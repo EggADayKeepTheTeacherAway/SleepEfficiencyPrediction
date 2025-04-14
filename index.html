@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Sleep Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css" />
+<script src="script.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Smart Sleep Tracker</h1>
+    <p>Visualize your sleep. Optimize your rest.</p>
+  </header>
+
+  <nav>
+    <button onclick="toggleSection('overview')">Overview</button>
+    <button onclick="toggleSection('dashboard')">Dashboard</button>
+    <button onclick="toggleSection('data')">Data</button>
+    <button onclick="toggleSection('api')">API</button>
+    <button onclick="toggleSection('predict')">Prediction</button>
+    <button onclick="toggleSection('team')">Team</button>
+  </nav>
+
+  <main>
+    <section id="overview" class="content-section active">
+      <h2>Project Overview</h2>
+      <p>
+        Your sleep quality is influenced by temperature, humidity, heart rate,
+        and more. This project combines real-time sensors and historical data to
+        help you sleep smarter.
+      </p>
+    </section>
+
+    <section id="dashboard" class="content-section">
+      <h2>Sleep Dashboard</h2>
+      <canvas id="sleepDurationChart"></canvas>
+      <canvas id="heartRateChart"></canvas>
+      <canvas id="envConditionsChart"></canvas>
+      <canvas id="qualityByDayChart"></canvas>
+    </section>
+
+    <section id="data" class="content-section">
+      <h2>Data Sources</h2>
+      <h3>Primary</h3>
+      <ul>
+        <li>KY-015: Temperature & Humidity Sensor</li>
+        <li>KY-039: Heartbeat Sensor</li>
+      </ul>
+      <h3>Secondary</h3>
+      <ul>
+        <li><a href="https://www.kaggle.com/datasets/equilibriumm/sleep-efficiency" target="_blank">Kaggle Sleep Efficiency Dataset</a></li>
+        <li><a href="https://www.kaggle.com/datasets/karthikiye/wearable-tech-sleep-quality/data" target="_blank">Kaggle Sleep Environment Dataset</a></li>
+      </ul>
+    </section>
+
+    <section id="api" class="content-section">
+      <h2>API Overview</h2>
+      <ul>
+        <li>Real-time metrics</li>
+        <li>Historical trends</li>
+        <li>Environmental impact analysis</li>
+        <li>Sleep quality prediction</li>
+      </ul>
+    </section>
+
+    <section id="predict" class="content-section">
+      <h2>Prediction Model</h2>
+      <p>Using environmental data and personal vitals, our model estimates your upcoming sleep quality before you close your eyes.</p>
+    </section>
+
+    <section id="team" class="content-section">
+      <h2>Team & Deliverables</h2>
+      <p>
+        This project was developed by a Year-2 student team for 01219335
+        (Data Acquisition and Integration). Final presentation includes API
+        documentation, dashboards, and a demo video.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Smart Sleep Tracker Project</p>
+  </footer>
