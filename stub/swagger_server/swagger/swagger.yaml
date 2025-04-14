@@ -1,0 +1,151 @@
+openapi: 3.0.0
+info:
+  title: Sleep Efficiency API
+  description: This API provides Real-time analysis of your sleep. Raw data provided
+    by 2 Kaggle datasets (links provided in github README).
+  version: 1.0.0
+servers:
+- url: http://127.0.0.1:8080/sleep-api
+paths:
+  /latest/{username}:
+    get:
+      summary: Returns the user's latest sleep data recorded.
+      operationId: controller_get_latest
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Latest"
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /efficiency/{username}:
+    get:
+      summary: Returns predicted sleep efficiency of the specified user.
+      operationId: controller_get_user_efficiency
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Efficiency"
+          links:
+            stations:
+              operationId: controller.get_stations_in_basin
+              parameters:
+                basinId: $response.body#/basinId
+            annualRainfall:
+              operationId: controller.get_basin_annual_rainfall
+              parameters:
+                basinId: $response.body#/basinId
+            avgMonthlyRainfalls:
+              operationId: controller.get_basin_monthly_average
+              parameters:
+                basinId: $response.body#/basinId
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /log/{username}:
+    get:
+      summary: Returns a list of user's sleep logs in the database.
+      operationId: controller_get_user_log
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogItem"
+                x-content-type: application/json
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+components:
+  schemas:
+    Latest:
+      type: object
+      properties:
+        ts:
+          type: string
+        temperature:
+          type: number
+        humidity:
+          type: number
+        heartrate:
+          type: integer
+      example:
+        heartrate: 1
+        temperature: 0.80082819046101150206595775671303272247314453125
+        humidity: 6.02745618307040320615897144307382404804229736328125
+        ts: ts
+    Efficiency:
+      type: object
+      properties:
+        light:
+          type: number
+          description: Percentage of time in Light sleep
+        rem:
+          type: number
+          description: Percentage of time in REM sleep
+        deep:
+          type: number
+          description: Percentage of time in Deep sleep
+        smoke:
+          type: boolean
+          description: User's smoking status
+        exercise:
+          type: integer
+          description: Number of user's exercises per week
+        efficiency:
+          type: number
+          description: Predicted sleep efficiency
+      example:
+        deep: 1.46581298050294517310021547018550336360931396484375
+        efficiency: 5.63737665663332876420099637471139430999755859375
+        light: 0.80082819046101150206595775671303272247314453125
+        smoke: true
+        exercise: 5
+        rem: 6.02745618307040320615897144307382404804229736328125
+    LogItem:
+      type: object
+      properties:
+        userId:
+          type: integer
+        ts:
+          type: string
+        temp:
+          type: number
+        humidity:
+          type: number
+        heartrate:
+          type: integer
+      example:
+        temp: 6.02745618307040320615897144307382404804229736328125
+        heartrate: 5
+        humidity: 1.46581298050294517310021547018550336360931396484375
+        userId: 0
+        ts: ts
+
