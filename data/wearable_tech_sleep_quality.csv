@@ -1,4 +1,4 @@
-Heart Rate,Body Temperature,Room Temperature,Humidity,Sleep Stage
+heartrate,Body Temperature,temperature,humidity,Sleep Stage
 88,36,23,34,Light
 101,36,28,59,Light
 78,35,22,32,REM
