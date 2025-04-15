@@ -62,6 +62,64 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LogItem'
+                  
+  /user/register:
+    post:
+      summary: Register a new user
+      operationId: controller.user_register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - age
+                - smoke
+                - exercise
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                age:
+                  type: integer
+                smoke:
+                  type: boolean
+                exercise:
+                  type: integer
+      responses:
+        200:
+          description: User registered successfully
+        400:
+          description: Bad request
+          
+  /user/login:
+    post:
+      summary: Login a user
+      operationId: controller.user_login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: User logged in successfully
+        400:
+          description: Bad request
+  
   
 
 components:
