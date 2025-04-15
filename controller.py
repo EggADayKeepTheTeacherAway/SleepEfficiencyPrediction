@@ -3,9 +3,11 @@ from flask import abort
 import pymysql
 from dbutils.pooled_db import PooledDB
 from config import OPENAPI_STUB_DIR, DB_HOST, DB_USER, DB_PASSWD, DB_NAME
+from models import SLEEP_STAGE_MODEL, SLEEP_QUALITY_MODEL
 
 sys.path.append(OPENAPI_STUB_DIR)
-from swagger_server import models
+from stub.swagger_server import models
+
 
 pool = PooledDB(creator=pymysql,
                 host=DB_HOST,
@@ -15,112 +17,92 @@ pool = PooledDB(creator=pymysql,
                 maxconnections=1,
                 blocking=True)
 
-def get_basins():
+
+def apply_model(model, data):
+    return model.predict(data)
+
+
+def get_latest(userId: int):
     with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT basin_id, ename, area
-            FROM basin
+        cs.execute(f"""
+            SELECT user_id, sleep_id, ts, temperature, humidity, heartrate
+            FROM sleep
+            WHERE user_id = {userId} AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = {userId} ORDER BY ts DESC LIMIT 1)
+            ORDER BY ts DESC
+            LIMIT 1;
         """)
-        result = [models.Basin(*row) for row in cs.fetchall()]
-        return result
+        return models.Latest(*cs.fetchone())
 
-def get_basin_details(basin_id):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT basin_id, ename, area
-            FROM basin
-            WHERE basin_id=%s
-        """, [basin_id])
-        result = cs.fetchone()
-    if result:
-        basin_id, name, area = result
-        return models.Basin(*result)
-    else:
-        abort(404)
 
-def get_stations_in_basin(basin_id):
+def get_user_efficiency(userId: int):
     with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT station_id, basin_id, ename, lat, lon
-            FROM station WHERE basin_id=%s
-            """, [basin_id])
-        result = [models.Station(*row) for row in cs.fetchall()]
-        return result
+        cs.execute(f"""
+            SELECT temperature, humidity, heartrate
+            FROM sleep
+            WHERE user_id = {userId} AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = {userId} ORDER BY ts DESC LIMIT 1)
+        """)
+        result = cs.fetchall()
+        if not result:
+            abort(404)
+        light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
 
-def get_station_details(station_id):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT station_id, basin_id, ename, lat, lon
-            FROM station
-            WHERE station_id=%s
-            """, [station_id])
-        result = cs.fetchone()
-    if result:
-        return models.Station(*result)
-    else:
-        abort(404)
+        cs.execute(f"""
+            SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds
+            FROM sleep
+            WHERE user_id = {userId} AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = {userId} ORDER BY ts DESC LIMIT 1)
+        """)
+        sleep_duration = cs.fetchone()[0]/3600
 
-def get_basin_annual_rainfall(basin_id, year):
     with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT SUM(daily_avg)
-            FROM (
-                SELECT r.year, r.month, r.day, AVG(r.amount) as daily_avg
-                FROM rainfall r
-                INNER JOIN station s ON r.station_id=s.station_id
-                INNER JOIN basin b ON b.basin_id=s.basin_id
-                WHERE b.basin_id=%s AND r.year=%s
-                GROUP BY r.year, r.month, r.day
-            ) daily_avg
-        """, [basin_id, year])
-        result = cs.fetchone()
-    if result and result[0]:
-        amount = round(result[0], 2)
-        return amount
-    else:
-        abort(404)
-
-def get_basin_monthly_average(basin_id):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT month, AVG(monthly_amount)
-            FROM (
-                SELECT SUM(r.amount) as monthly_amount, month
-                FROM rainfall r
-                INNER JOIN station s ON r.station_id=s.station_id
-                INNER JOIN basin b ON s.basin_id=b.basin_id
-                WHERE b.basin_id=%s
-                GROUP BY r.station_id, month, year
-            ) monthly
-            GROUP BY month
-            ORDER BY month ASC
-            """, [basin_id])
-        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        result = [
-            models.MonthlyAverage(months[month-1], month, round(amount, 2))
-            for month, amount in cs.fetchall()
-        ]
-        return result
-
-def get_basin_annual_average(basin_id):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT year, AVG(year_amt)
-            FROM (
-                SELECT SUM(r.amount) as year_amt, year
-                FROM rainfall r
-                INNER JOIN station s ON r.station_id=s.station_id
-                WHERE s.basin_id=%s
-                GROUP BY r.station_id, year
-            ) yearly
-            GROUP BY year
-            ORDER BY year DESC;
-            """, [basin_id])
-        result = [
-            models.AnnualRainfall(year, round(amount, 2))
-            for year, amount in cs.fetchall()
-        ]
-        return result
+        cs.execute(f"""
+            SELECT age, gender, smoke, exercise
+            FROM sleep_user_data
+            WHERE user_id = {userId}
+        """)
+        age, gender, smoke, exercise = cs.fetchone()
+        sleep_efficiency = apply_model(SLEEP_STAGE_MODEL, [age, sleep_duration, rem, deep, light, exercise, gender, smoke])
+    return models.Efficiency(light, rem, deep, smoke, exercise, sleep_efficiency)
     
+        
+def get_user_efficiency_sleep_id(userId: int, sleepId: int):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute(f"""
+            SELECT temperature, humidity, heartrate
+            FROM sleep
+            WHERE user_id = {userId} AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = {userId} ORDER BY ts DESC LIMIT 1)
+        """)
+        result = cs.fetchall()
+        if not result:
+            abort(404)
+        light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
+
+        cs.execute(f"""
+            SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds
+            FROM sleep
+            WHERE user_id = {userId} AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = {userId} ORDER BY ts DESC LIMIT 1)
+        """)
+        sleep_duration = cs.fetchone()[0]/3600
+
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute(f"""
+            SELECT age, gender, smoke, exercise
+            FROM sleep_user_data
+            WHERE user_id = {userId}
+        """)
+        age, gender, smoke, exercise = cs.fetchone()
+        sleep_efficiency = apply_model(SLEEP_STAGE_MODEL, [age, sleep_duration, rem, deep, light, exercise, gender, smoke])
+    return models.Efficiency(light, rem, deep, smoke, exercise, sleep_efficiency)
+
     
+def get_user_log(userId: int):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute(f"""
+            SELECT sleep_id, ts, temperature, humidity, heartrate
+            FROM sleep 
+            WHERE user_id = {userId}
+            """)
+        result = cs.fetchall()
+        if not result:
+            return abort(404)
+        result = [models.LogItem(*row) for row in result]
+        return result
