@@ -7,13 +7,13 @@ info:
 servers:
   - url: http://127.0.0.1:8080/sleep-api
 paths:
-  /latest/{username}:
+  /latest/{userId}:
     parameters:
-    - name: username
+    - name: userId
       in: path
       required: true
       schema:
-        type : string
+        type : integer
     get:
       summary: Returns the user's latest sleep data recorded.
       operationId: controller.get_latest
@@ -24,13 +24,13 @@ paths:
             application/json:
               schema:
                   $ref: '#/components/schemas/Latest'
-  /efficiency/{username}:
+  /efficiency/{userId}:
     parameters:
-    - name: username
+    - name: userId
       in: path
       required: true
       schema:
-        type : string
+        type : integer
     get:
       summary: Returns predicted sleep efficiency of the specified user.
       operationId: controller.get_user_efficiency
@@ -54,13 +54,13 @@ paths:
               operationId: controller.get_basin_monthly_average
               parameters:
                 basinId: $response.body#/basinId
-  /log/{username}:
+  /log/{userId}:
     parameters:
-    - name: username
+    - name: userId
       in: path
       required: true
       schema:
-        type : string
+        type : integer
     get:
       summary: Returns a list of user's sleep logs in the database.
       operationId: controller.get_user_log
