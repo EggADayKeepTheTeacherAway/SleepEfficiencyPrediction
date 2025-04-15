@@ -89,7 +89,10 @@ def get_user_efficiency_sleep_id(userId: int, sleepId: int):
             FROM sleep_user_data
             WHERE user_id = {userId}
         """)
-        age, gender, smoke, exercise = cs.fetchone()
+        result = cs.fetchone()
+        if not result:
+            return abort(404)
+        age, gender, smoke, exercise = result
         sleep_efficiency = apply_model(SLEEP_STAGE_MODEL, [age, sleep_duration, rem, deep, light, exercise, gender, smoke])
     return models.Efficiency(light, rem, deep, smoke, exercise, sleep_efficiency)
 
@@ -97,7 +100,7 @@ def get_user_efficiency_sleep_id(userId: int, sleepId: int):
 def get_user_log(userId: int):
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute(f"""
-            SELECT sleep_id, ts, temperature, humidity, heartrate
+            SELECT user_id,sleep_id, ts, temperature, humidity, heartrate
             FROM sleep 
             WHERE user_id = {userId}
             """)
