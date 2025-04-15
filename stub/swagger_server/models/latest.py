@@ -14,9 +14,13 @@ class Latest(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, ts: str=None, temperature: float=None, humidity: float=None, heartrate: int=None):  # noqa: E501
+    def __init__(self, user_id: int=None, sleep_id: int=None, ts: str=None, temperature: float=None, humidity: float=None, heartrate: int=None):  # noqa: E501
         """Latest - a model defined in Swagger
 
+        :param user_id: The user_id of this Latest.  # noqa: E501
+        :type user_id: int
+        :param sleep_id: The sleep_id of this Latest.  # noqa: E501
+        :type sleep_id: int
         :param ts: The ts of this Latest.  # noqa: E501
         :type ts: str
         :param temperature: The temperature of this Latest.  # noqa: E501
@@ -27,6 +31,8 @@ class Latest(Model):
         :type heartrate: int
         """
         self.swagger_types = {
+            'user_id': int,
+            'sleep_id': int,
             'ts': str,
             'temperature': float,
             'humidity': float,
@@ -34,11 +40,15 @@ class Latest(Model):
         }
 
         self.attribute_map = {
+            'user_id': 'user_id',
+            'sleep_id': 'sleep_id',
             'ts': 'ts',
             'temperature': 'temperature',
             'humidity': 'humidity',
             'heartrate': 'heartrate'
         }
+        self._user_id = user_id
+        self._sleep_id = sleep_id
         self._ts = ts
         self._temperature = temperature
         self._humidity = humidity
@@ -54,6 +64,48 @@ class Latest(Model):
         :rtype: Latest
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def user_id(self) -> int:
+        """Gets the user_id of this Latest.
+
+
+        :return: The user_id of this Latest.
+        :rtype: int
+        """
+        return self._user_id
+
+    @user_id.setter
+    def user_id(self, user_id: int):
+        """Sets the user_id of this Latest.
+
+
+        :param user_id: The user_id of this Latest.
+        :type user_id: int
+        """
+
+        self._user_id = user_id
+
+    @property
+    def sleep_id(self) -> int:
+        """Gets the sleep_id of this Latest.
+
+
+        :return: The sleep_id of this Latest.
+        :rtype: int
+        """
+        return self._sleep_id
+
+    @sleep_id.setter
+    def sleep_id(self, sleep_id: int):
+        """Sets the sleep_id of this Latest.
+
+
+        :param sleep_id: The sleep_id of this Latest.
+        :type sleep_id: int
+        """
+
+        self._sleep_id = sleep_id
 
     @property
     def ts(self) -> str:

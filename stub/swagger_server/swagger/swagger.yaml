@@ -7,18 +7,18 @@ info:
 servers:
 - url: http://127.0.0.1:8080/sleep-api
 paths:
-  /latest/{username}:
+  /latest/{user_id}:
     get:
       summary: Returns the user's latest sleep data recorded.
       operationId: controller_get_latest
       parameters:
-      - name: username
+      - name: user_id
         in: path
         required: true
         style: simple
         explode: false
         schema:
-          type: string
+          type: integer
       responses:
         "200":
           description: Success
@@ -27,18 +27,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/Latest"
       x-openapi-router-controller: swagger_server.controllers.default_controller
-  /efficiency/{username}:
+  /efficiency/{user_id}:
     get:
       summary: Returns predicted sleep efficiency of the specified user.
       operationId: controller_get_user_efficiency
       parameters:
-      - name: username
+      - name: user_id
         in: path
         required: true
         style: simple
         explode: false
         schema:
-          type: string
+          type: integer
       responses:
         "200":
           description: Success
@@ -46,32 +46,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Efficiency"
-          links:
-            stations:
-              operationId: controller.get_stations_in_basin
-              parameters:
-                basinId: $response.body#/basinId
-            annualRainfall:
-              operationId: controller.get_basin_annual_rainfall
-              parameters:
-                basinId: $response.body#/basinId
-            avgMonthlyRainfalls:
-              operationId: controller.get_basin_monthly_average
-              parameters:
-                basinId: $response.body#/basinId
       x-openapi-router-controller: swagger_server.controllers.default_controller
-  /log/{username}:
+  /log/{user_id}:
     get:
       summary: Returns a list of user's sleep logs in the database.
       operationId: controller_get_user_log
       parameters:
-      - name: username
+      - name: user_id
         in: path
         required: true
         style: simple
         explode: false
         schema:
-          type: string
+          type: integer
       responses:
         "200":
           description: Success
@@ -88,6 +75,10 @@ components:
     Latest:
       type: object
       properties:
+        user_id:
+          type: integer
+        sleep_id:
+          type: integer
         ts:
           type: string
         temperature:
@@ -97,9 +88,11 @@ components:
         heartrate:
           type: integer
       example:
-        heartrate: 1
-        temperature: 0.80082819046101150206595775671303272247314453125
-        humidity: 6.02745618307040320615897144307382404804229736328125
+        user_id: 0
+        sleep_id: 6
+        heartrate: 5
+        temperature: 1.4658129805029452
+        humidity: 5.962133916683182
         ts: ts
     Efficiency:
       type: object
@@ -123,29 +116,32 @@ components:
           type: number
           description: Predicted sleep efficiency
       example:
-        deep: 1.46581298050294517310021547018550336360931396484375
-        efficiency: 5.63737665663332876420099637471139430999755859375
-        light: 0.80082819046101150206595775671303272247314453125
+        deep: 1.4658129805029452
+        efficiency: 5.637376656633329
+        light: 0.8008281904610115
         smoke: true
         exercise: 5
-        rem: 6.02745618307040320615897144307382404804229736328125
+        rem: 6.027456183070403
     LogItem:
       type: object
       properties:
-        userId:
+        user_id:
+          type: integer
+        sleep_id:
           type: integer
         ts:
           type: string
-        temp:
+        temperature:
           type: number
         humidity:
           type: number
         heartrate:
           type: integer
       example:
-        temp: 6.02745618307040320615897144307382404804229736328125
+        user_id: 0
+        sleep_id: 6
         heartrate: 5
-        humidity: 1.46581298050294517310021547018550336360931396484375
-        userId: 0
+        temperature: 1.4658129805029452
+        humidity: 5.962133916683182
         ts: ts
 

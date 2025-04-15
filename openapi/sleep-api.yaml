@@ -7,9 +7,9 @@ info:
 servers:
   - url: http://127.0.0.1:8080/sleep-api
 paths:
-  /latest/{userId}:
+  /latest/{user_id}:
     parameters:
-    - name: userId
+    - name: user_id
       in: path
       required: true
       schema:
@@ -24,9 +24,10 @@ paths:
             application/json:
               schema:
                   $ref: '#/components/schemas/Latest'
-  /efficiency/{userId}:
+                  
+  /efficiency/{user_id}:
     parameters:
-    - name: userId
+    - name: user_id
       in: path
       required: true
       schema:
@@ -41,22 +42,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Efficiency'
-          links:
-            stations:
-              operationId: controller.get_stations_in_basin
-              parameters:
-                basinId: $response.body#/basinId
-            annualRainfall:
-              operationId: controller.get_basin_annual_rainfall
-              parameters:
-                basinId: $response.body#/basinId
-            avgMonthlyRainfalls:
-              operationId: controller.get_basin_monthly_average
-              parameters:
-                basinId: $response.body#/basinId
-  /log/{userId}:
+         
+  /log/{user_id}:
     parameters:
-    - name: userId
+    - name: user_id
       in: path
       required: true
       schema:
@@ -80,6 +69,10 @@ components:
     Latest:
       type: object
       properties:
+        user_id:
+          type: integer
+        sleep_id:
+          type: integer
         ts:
           type: string
         temperature:
@@ -112,11 +105,13 @@ components:
     LogItem:
       type: object
       properties:
-        userId:
+        user_id:
+          type: integer
+        sleep_id:
           type: integer
         ts:
           type: string
-        temp:
+        temperature:
           type: number
         humidity:
           type: number

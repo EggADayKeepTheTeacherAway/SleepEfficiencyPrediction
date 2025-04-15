@@ -14,15 +14,17 @@ class LogItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, user_id: int=None, ts: str=None, temp: float=None, humidity: float=None, heartrate: int=None):  # noqa: E501
+    def __init__(self, user_id: int=None, sleep_id: int=None, ts: str=None, temperature: float=None, humidity: float=None, heartrate: int=None):  # noqa: E501
         """LogItem - a model defined in Swagger
 
         :param user_id: The user_id of this LogItem.  # noqa: E501
         :type user_id: int
+        :param sleep_id: The sleep_id of this LogItem.  # noqa: E501
+        :type sleep_id: int
         :param ts: The ts of this LogItem.  # noqa: E501
         :type ts: str
-        :param temp: The temp of this LogItem.  # noqa: E501
-        :type temp: float
+        :param temperature: The temperature of this LogItem.  # noqa: E501
+        :type temperature: float
         :param humidity: The humidity of this LogItem.  # noqa: E501
         :type humidity: float
         :param heartrate: The heartrate of this LogItem.  # noqa: E501
@@ -30,22 +32,25 @@ class LogItem(Model):
         """
         self.swagger_types = {
             'user_id': int,
+            'sleep_id': int,
             'ts': str,
-            'temp': float,
+            'temperature': float,
             'humidity': float,
             'heartrate': int
         }
 
         self.attribute_map = {
-            'user_id': 'userId',
+            'user_id': 'user_id',
+            'sleep_id': 'sleep_id',
             'ts': 'ts',
-            'temp': 'temp',
+            'temperature': 'temperature',
             'humidity': 'humidity',
             'heartrate': 'heartrate'
         }
         self._user_id = user_id
+        self._sleep_id = sleep_id
         self._ts = ts
-        self._temp = temp
+        self._temperature = temperature
         self._humidity = humidity
         self._heartrate = heartrate
 
@@ -82,6 +87,27 @@ class LogItem(Model):
         self._user_id = user_id
 
     @property
+    def sleep_id(self) -> int:
+        """Gets the sleep_id of this LogItem.
+
+
+        :return: The sleep_id of this LogItem.
+        :rtype: int
+        """
+        return self._sleep_id
+
+    @sleep_id.setter
+    def sleep_id(self, sleep_id: int):
+        """Sets the sleep_id of this LogItem.
+
+
+        :param sleep_id: The sleep_id of this LogItem.
+        :type sleep_id: int
+        """
+
+        self._sleep_id = sleep_id
+
+    @property
     def ts(self) -> str:
         """Gets the ts of this LogItem.
 
@@ -103,25 +129,25 @@ class LogItem(Model):
         self._ts = ts
 
     @property
-    def temp(self) -> float:
-        """Gets the temp of this LogItem.
+    def temperature(self) -> float:
+        """Gets the temperature of this LogItem.
 
 
-        :return: The temp of this LogItem.
+        :return: The temperature of this LogItem.
         :rtype: float
         """
-        return self._temp
+        return self._temperature
 
-    @temp.setter
-    def temp(self, temp: float):
-        """Sets the temp of this LogItem.
+    @temperature.setter
+    def temperature(self, temperature: float):
+        """Sets the temperature of this LogItem.
 
 
-        :param temp: The temp of this LogItem.
-        :type temp: float
+        :param temperature: The temperature of this LogItem.
+        :type temperature: float
         """
 
-        self._temp = temp
+        self._temperature = temperature
 
     @property
     def humidity(self) -> float:

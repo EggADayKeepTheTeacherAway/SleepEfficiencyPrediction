@@ -20,7 +20,7 @@ class TestDefaultController(BaseTestCase):
         Returns the user's latest sleep data recorded.
         """
         response = self.client.open(
-            '/sleep-api/latest/{username}'.format(username='username_example'),
+            '/sleep-api/latest/{user_id}'.format(user_id=56),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -31,7 +31,7 @@ class TestDefaultController(BaseTestCase):
         Returns predicted sleep efficiency of the specified user.
         """
         response = self.client.open(
-            '/sleep-api/efficiency/{username}'.format(username='username_example'),
+            '/sleep-api/efficiency/{user_id}'.format(user_id=56),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -42,7 +42,7 @@ class TestDefaultController(BaseTestCase):
         Returns a list of user's sleep logs in the database.
         """
         response = self.client.open(
-            '/sleep-api/log/{username}'.format(username='username_example'),
+            '/sleep-api/log/{user_id}'.format(user_id=56),
             method='GET')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
