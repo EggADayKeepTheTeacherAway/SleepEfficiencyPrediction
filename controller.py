@@ -149,6 +149,31 @@ def user_register():
         conn.commit()
     return "User Registered", 200, {"Access-Control-Allow-Origin": "*"} 
 
+
+def user_edit():
+    body = request.json
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            UPDATE `sleep_user_data`
+            SET `username` = %s,
+                `password` = %s,
+                `age` = %s,
+                `gender` = %s,
+                `smoke` = %s,
+                `exercise` = %s
+            WHERE `user_id` = %s
+        """, (
+            body['username'],
+            body['password'],
+            body['age'],
+            body['gender'],
+            body['smoke'],
+            body['exercise'],
+            body['user_id']
+        ))
+        conn.commit()
+        return "Success", 200, {"Access-Control-Allow-Origin": "*"} 
+    
     
 def user_login():
     body = request.json

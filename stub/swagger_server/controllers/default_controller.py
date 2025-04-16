@@ -4,6 +4,7 @@ import six
 from swagger_server.models.efficiency import Efficiency  # noqa: E501
 from swagger_server.models.latest import Latest  # noqa: E501
 from swagger_server.models.log_item import LogItem  # noqa: E501
+from swagger_server.models.user_edit_body import UserEditBody  # noqa: E501
 from swagger_server.models.user_login_body import UserLoginBody  # noqa: E501
 from swagger_server.models.user_register_body import UserRegisterBody  # noqa: E501
 from swagger_server import util
@@ -45,6 +46,21 @@ def controller_get_user_log(user_id):  # noqa: E501
 
     :rtype: List[LogItem]
     """
+    return 'do some magic!'
+
+
+def controller_user_edit(body):  # noqa: E501
+    """Edit an existing user
+
+     # noqa: E501
+
+    :param body: 
+    :type body: dict | bytes
+
+    :rtype: None
+    """
+    if connexion.request.is_json:
+        body = UserEditBody.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 
