@@ -1,5 +1,5 @@
 import sys
-from flask import abort
+from flask import abort, request
 import pymysql
 from dbutils.pooled_db import PooledDB
 from config import OPENAPI_STUB_DIR, DB_HOST, DB_USER, DB_PASSWD, DB_NAME
@@ -115,18 +115,19 @@ def get_user_log(user_id: int):
         return result
 
 
-def user_register(username: str, password: str, age: int, gender: str, smoke: bool, exercise: int):
-    if (len(username) > 255 or 
-        len(password) > 255 or 
-        age <= 0 or 
-        gender not in ['male', 'female'] or
-        exercise < 0 or 7 < exercise):
+def user_register():
+    body = request.json
+    if (len(body['username']) > 255 or 
+        len(body['password']) > 255 or 
+        body['age'] <= 0 or 
+        body['gender'] not in ['male', 'female'] or
+        body['exercise'] < 0 or 7 < body['exercise']):
         return abort(400)
 
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute(f"""
             INSERT INTO `sleep_user_data` (`username`, `password`, `age`, `gender`, `smoke`, `exercise`) 
-                   VALUES (NULL, '{username}', '{password}', '{age}', '{gender}', '{smoke}', '{exercise}')
+                   VALUES (NULL, '{body['username']}', '{body['password']}', '{body['age']}', '{body['gender']}', '{body['smoke']}', '{body['exercise']}')
             """)
         result = cs.fetchall()
         if not result:
@@ -135,12 +136,13 @@ def user_register(username: str, password: str, age: int, gender: str, smoke: bo
         return result
     
 
-def user_login(username: str, password: str):
+def user_login():
+    body = request.json
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute(f"""
             SELECT user_id
             FROM sleep_user_data
-            WHERE username = {username} AND password = {password}
+            WHERE username = '{body['username']}' AND password = '{body['password']}'
             """)
         if cs.fetchone():
             return "Success", 200, {"Access-Control-Allow-Origin": "*"} 

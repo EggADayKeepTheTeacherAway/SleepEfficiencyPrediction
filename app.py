@@ -23,7 +23,7 @@ except ModuleNotFoundError:
           " pip install -r requirements.txt")
     sys.exit(1)
 
-from swagger_server import encoder
+from stub.swagger_server import encoder
 
 def main():
     app = connexion.App(__name__, specification_dir='./openapi/')
