@@ -178,3 +178,6 @@ cython_debug/
 
 #config files
 config.py
+
+#vscode?? stuff
+tempCodeRunnerFile.py
