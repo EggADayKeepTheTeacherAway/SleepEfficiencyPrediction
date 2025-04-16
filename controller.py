@@ -122,20 +122,34 @@ def user_register():
         body['age'] <= 0 or 
         body['gender'] not in ['male', 'female'] or
         body['exercise'] < 0 or 7 < body['exercise']):
-        return abort(400)
-
+        return "Invalid Values", 400, {"Access-Control-Allow-Origin": "*"}
+    
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute(f"""
-            INSERT INTO `sleep_user_data` (`username`, `password`, `age`, `gender`, `smoke`, `exercise`) 
-                   VALUES (NULL, '{body['username']}', '{body['password']}', '{body['age']}', '{body['gender']}', '{body['smoke']}', '{body['exercise']}')
+            SELECT user_id
+            FROM sleep_user_data
+            WHERE username = '{body['username']}'
             """)
-        result = cs.fetchall()
-        if not result:
-            return abort(400)
-        result = [models.LogItem(*row) for row in result]
-        return result
-    
 
+    if cs.fetchone():
+        return "Username taken", 400, {"Access-Control-Allow-Origin": "*"} 
+
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            INSERT INTO `sleep_user_data` (`username`, `password`, `age`, `gender`, `smoke`, `exercise`) 
+            VALUES (%s, %s, %s, %s, %s, %s) 
+        """, (
+            body['username'],
+            body['password'],
+            body['age'],
+            body['gender'],
+            int(body['smoke'] == 'true'),
+            body['exercise']
+        ))
+        conn.commit()
+    return "User Registered", 200, {"Access-Control-Allow-Origin": "*"} 
+
+    
 def user_login():
     body = request.json
     with pool.connection() as conn, conn.cursor() as cs:
