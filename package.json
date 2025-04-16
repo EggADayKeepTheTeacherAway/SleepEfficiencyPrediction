@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "openapi-to-graphql": "^3.0.7"
+  }
+}

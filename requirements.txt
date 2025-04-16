@@ -1,0 +1,7 @@
+-r stub/requirements.txt
+DBUtils
+PyMySQL
+cryptography
+numpy
+scikit-learn
+pandas

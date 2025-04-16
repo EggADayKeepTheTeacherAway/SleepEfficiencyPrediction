@@ -1,0 +1,147 @@
+openapi: 3.0.0
+info:
+  title: Sleep Efficiency API
+  description: This API provides Real-time analysis of your sleep. Raw data provided
+    by 2 Kaggle datasets (links provided in github README).
+  version: 1.0.0
+servers:
+- url: http://127.0.0.1:8080/sleep-api
+paths:
+  /latest/{user_id}:
+    get:
+      summary: Returns the user's latest sleep data recorded.
+      operationId: controller_get_latest
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Latest"
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /efficiency/{user_id}:
+    get:
+      summary: Returns predicted sleep efficiency of the specified user.
+      operationId: controller_get_user_efficiency
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Efficiency"
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /log/{user_id}:
+    get:
+      summary: Returns a list of user's sleep logs in the database.
+      operationId: controller_get_user_log
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogItem"
+                x-content-type: application/json
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+components:
+  schemas:
+    Latest:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        sleep_id:
+          type: integer
+        ts:
+          type: string
+        temperature:
+          type: number
+        humidity:
+          type: number
+        heartrate:
+          type: integer
+      example:
+        user_id: 0
+        sleep_id: 6
+        heartrate: 5
+        temperature: 1.4658129805029452
+        humidity: 5.962133916683182
+        ts: ts
+    Efficiency:
+      type: object
+      properties:
+        light:
+          type: number
+          description: Percentage of time in Light sleep
+        rem:
+          type: number
+          description: Percentage of time in REM sleep
+        deep:
+          type: number
+          description: Percentage of time in Deep sleep
+        smoke:
+          type: boolean
+          description: User's smoking status
+        exercise:
+          type: integer
+          description: Number of user's exercises per week
+        efficiency:
+          type: number
+          description: Predicted sleep efficiency
+      example:
+        deep: 1.4658129805029452
+        efficiency: 5.637376656633329
+        light: 0.8008281904610115
+        smoke: true
+        exercise: 5
+        rem: 6.027456183070403
+    LogItem:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        sleep_id:
+          type: integer
+        ts:
+          type: string
+        temperature:
+          type: number
+        humidity:
+          type: number
+        heartrate:
+          type: integer
+      example:
+        user_id: 0
+        sleep_id: 6
+        heartrate: 5
+        temperature: 1.4658129805029452
+        humidity: 5.962133916683182
+        ts: ts
+
