@@ -92,7 +92,7 @@ paths:
                   example: "`male` or `female` only"
                 smoke:
                   type: boolean
-                  example: "False"
+                  example: "false"
                 exercise:
                   type: integer
       responses:
@@ -100,6 +100,44 @@ paths:
           description: User registered successfully
         400:
           description: Bad request
+            
+  /user/edit:
+      post:
+        summary: Edit an existing user
+        operationId: controller.user_edit
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - username
+                  - password
+                  - age
+                  - gender
+                  - smoke
+                  - exercise
+                properties:
+                  username:
+                    type: string
+                  password:
+                    type: string
+                  age:
+                    type: integer
+                  gender:
+                    type: string
+                    example: "`male` or `female` only"
+                  smoke:
+                    type: boolean
+                    example: "false"
+                  exercise:
+                    type: integer
+        responses:
+          200:
+            description: User edited successfully
+          400:
+            description: Bad request
           
   /user/login:
     post:

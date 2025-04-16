@@ -8,6 +8,7 @@ from six import BytesIO
 from swagger_server.models.efficiency import Efficiency  # noqa: E501
 from swagger_server.models.latest import Latest  # noqa: E501
 from swagger_server.models.log_item import LogItem  # noqa: E501
+from swagger_server.models.user_edit_body import UserEditBody  # noqa: E501
 from swagger_server.models.user_login_body import UserLoginBody  # noqa: E501
 from swagger_server.models.user_register_body import UserRegisterBody  # noqa: E501
 from swagger_server.test import BaseTestCase
@@ -46,6 +47,20 @@ class TestDefaultController(BaseTestCase):
         response = self.client.open(
             '/sleep-api/log/{user_id}'.format(user_id=56),
             method='GET')
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_controller_user_edit(self):
+        """Test case for controller_user_edit
+
+        Edit an existing user
+        """
+        body = UserEditBody()
+        response = self.client.open(
+            '/sleep-api/user/edit',
+            method='POST',
+            data=json.dumps(body),
+            content_type='application/json')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 

@@ -86,6 +86,22 @@ paths:
         "400":
           description: Bad request
       x-openapi-router-controller: swagger_server.controllers.default_controller
+  /user/edit:
+    post:
+      summary: Edit an existing user
+      operationId: controller_user_edit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user_edit_body"
+        required: true
+      responses:
+        "200":
+          description: User edited successfully
+        "400":
+          description: Bad request
+      x-openapi-router-controller: swagger_server.controllers.default_controller
   /user/login:
     post:
       summary: Login a user
@@ -197,6 +213,31 @@ components:
           example: '`male` or `female` only'
         smoke:
           type: boolean
+          example: false
+        exercise:
+          type: integer
+    user_edit_body:
+      required:
+      - age
+      - exercise
+      - gender
+      - password
+      - smoke
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        age:
+          type: integer
+        gender:
+          type: string
+          example: '`male` or `female` only'
+        smoke:
+          type: boolean
+          example: false
         exercise:
           type: integer
     user_login_body:
