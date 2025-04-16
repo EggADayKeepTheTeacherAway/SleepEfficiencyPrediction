@@ -112,6 +112,7 @@ paths:
               schema:
                 type: object
                 required:
+                  - user_id
                   - username
                   - password
                   - age
@@ -119,6 +120,8 @@ paths:
                   - smoke
                   - exercise
                 properties:
+                  user_id:
+                    type: integer
                   username:
                     type: string
                   password:
