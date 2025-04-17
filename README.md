@@ -54,7 +54,7 @@ cd SleepQualityPrediction
 ### Python set up
 1. Creating python virtual environment
   ```cmd
-  python -m venv backend/.venv
+  python3 -m venv backend/.venv
   ```
 2. Activate your virtual environment
   - Window
@@ -69,6 +69,14 @@ cd SleepQualityPrediction
   ```cmd
   pip install -r backend/requirements.txt
   ```
-4. Set up your own confi file based on __backend/config.py.example__
+4. Set up your own config file based on __backend/config.py.example__
 
 ### Starting API server
+- Start app.py
+```cmd
+python3 backend/app.py
+```
+
+# Frontend
+
+
