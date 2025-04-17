@@ -1,4 +1,4 @@
--r stub/requirements.txt
-DBUtils
-PyMySQL
-
+uvicorn
+fastapi
+scikit-learn
+cryptography
