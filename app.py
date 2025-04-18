@@ -116,27 +116,57 @@ elif page == "Data Sources":
         - Google Forms
     """)
     st.subheader("Secondary")
+
+    # Dataset Links
     st.markdown("""
-        - [Kaggle Sleep Efficiency Dataset](https://www.kaggle.com/datasets/equilibriumm/sleep-efficiency)
-        - ![](/images/sleep_efficiency.jpg)
-        - [Kaggle Sleep Environment Dataset](https://www.kaggle.com/datasets/karthikiye/wearable-tech-sleep-quality/data)
-        - ![](/images/sleep_quality.jpg)
-        - [Sleep Health and Lifestyle Dataset](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset)
-        - ![](/images/sleep_lifestyle.jpg)
+    - [Kaggle Sleep Efficiency Dataset](https://www.kaggle.com/datasets/equilibriumm/sleep-efficiency)
+    - [Kaggle Sleep Environment Dataset](https://www.kaggle.com/datasets/karthikiye/wearable-tech-sleep-quality/data)
+    - [Sleep Health and Lifestyle Dataset](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset)
     """)
-    st.info("Ensure the images are in a static `images` folder at the root of your Streamlit app or accessible via a URL.")
+
+    # Dataset Images Showcase
+    st.markdown("### Dataset Visuals")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.image("images/sleep_efficiency.jpg", caption="Sleep Efficiency Dataset",
+                 use_container_width=True)
+
+    with col2:
+        st.image("images/sleep_quality.jpg", caption="Sleep Environment Dataset",
+                 use_container_width=True)
+
+    with col3:
+        st.image("images/sleep_lifestyle.jpg", caption="Sleep Lifestyle Dataset",
+                 use_container_width=True)
 
 elif page == "API Info":
     st.header("API Overview")
-    st.image("images/api_example.jpg", caption="API Overview Diagram", use_container_width=True)
+    st.image("images/api_full.jpg", caption="API Overview Diagram", use_container_width=True)
     st.markdown("""
-        - `/efficiency/{user_id}`: Predicted sleep efficiency and breakdown for latest session
-        - `/log/{user_id}`: All logged environmental + heartrate data
-        - `/latest/{user_id}`: Latest reading from sensors
-        - `/user/login`: Authenticates a user
-        - `/user/register`: Registers a new user with age, gender, exercise, and smoke info
-        - `/user/edit`: Updates user profile info
+    This backend REST API allows interaction with the Smart Sleep Tracker system via the following endpoints:
+
+    ### 🔍 User Data & Sessions
+    - `GET /sleep-api/latest/{user_id}` – Get the latest environmental reading (temperature, humidity, heart rate).
+    - `GET /sleep-api/sessions/{user_id}` – Retrieve all recorded sleep sessions for a user.
+
+    ### 📊 Sleep Efficiency
+    - `GET /sleep-api/efficiency/{user_id}` – Get sleep efficiency history for a user.
+    - `GET /sleep-api/efficiency/{user_id}/{sleep_id}` – Get sleep efficiency details for a specific session.
+
+    ### 📈 Environmental Logs
+    - `GET /sleep-api/log/{user_id}` – Get all sensor logs for a user.
+    - `GET /sleep-api/log/{user_id}/{sleep_id}` – Get sensor logs for a specific sleep session.
+    - `POST /sleep-api/log` – Submit new sensor data (username, password, temperature, humidity, heart rate).
+
+    ### 👤 User Management
+    - `POST /sleep-api/user/register` – Register a new user with age, gender, smoking, and exercise details.
+    - `POST /sleep-api/user/login` – Authenticate a user and start a session.
+    - `POST /sleep-api/user/edit` – Update an existing user's profile.
+    - `POST /sleep-api/user/delete` – Delete a user (requires user_id, username, and password).
     """)
+
+    st.info("All endpoints expect JSON requests/responses. Use the appropriate method (GET/POST) when integrating.")
 
 elif page == "Prediction":
     st.header("Sleep Prediction")
@@ -189,17 +219,30 @@ elif page == "Prediction":
                 all_efficiency_response.raise_for_status()
                 all_efficiency_data = all_efficiency_response.json()
 
-                if all_efficiency_data:
-                    df_history = pd.DataFrame(all_efficiency_data)
-                    if 'start_time' in df_history.columns:
-                        # Specify the DMY and time format for 'start_time' as well, if applicable
-                        df_history['start_time'] = pd.to_datetime(df_history['start_time'], format='%Y-%m-%d %H:%M:%S') # Adjust format if needed
-                        fig_history = px.line(df_history, x='start_time', y='efficiency', title='Sleep Efficiency Over Time')
-                        st.plotly_chart(fig_history)
-                    else:
-                        st.warning("No 'start_time' column found in efficiency history data.")
-                else:
-                    st.warning("No sleep efficiency history available.")
+                # if all_efficiency_data:
+                #     df_history = pd.DataFrame(all_efficiency_data)
+                #     if 'start_time' in df_history.columns:
+                #         try:
+                #             # Convert and sort
+                #             df_history['start_time'] = pd.to_datetime(df_history['start_time'])
+                #             df_history = df_history.sort_values(by='start_time')
+                #
+                #             # Format x-axis (Plotly + update_layout)
+                #             fig_history = px.line(df_history, x='start_time', y='efficiency',
+                #                                   title='Sleep Efficiency Over Time')
+                #             fig_history.update_layout(
+                #                 xaxis_title='Date',
+                #                 xaxis_tickformat='%b %d, %Y %H:%M',
+                #                 yaxis_title='Efficiency',
+                #                 yaxis_range=[0, 1.1]
+                #             )
+                #             st.plotly_chart(fig_history)
+                #         except Exception as e:
+                #             st.error(f"Could not parse efficiency history timestamps: {e}")
+                #     else:
+                #         st.warning("No 'start_time' column found in efficiency history data.")
+                # else:
+                #     st.warning("No sleep efficiency history available.")
 
         except requests.exceptions.RequestException as e:
             st.error(f"Error fetching data: {e}")
@@ -211,11 +254,25 @@ elif page == "Prediction":
 elif page == "Team":
     st.header("Team & Deliverables")
     st.subheader("Team")
-    st.markdown("""
-        - **Riccardo Mario Bonato:** Front End
-        - **Rattanan Rung-Uthai:** Back End & API Design
-    """)
-    st.subheader("Deliverables")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.image("images/members/rick.jpg", caption="Riccardo Mario Bonato – Front End",
+                 use_container_width=True)
+        st.markdown("""
+        **Riccardo Mario Bonato**  
+        🧩 Front End Developer
+        """)
+
+    with col2:
+        st.image("images/members/rat.jpg", caption="Rattanan Rung-Uthai – Back End",
+                 use_container_width=True)
+        st.markdown("""
+        **Rattanan Rung-Uthai**  
+        ⚙️ Back End & API Design
+        """)
+        st.subheader("Deliverables")
     st.markdown("""
         This project was developed by a Year-2 student team from course 01219335 (Data Acquisition and Integration). Final deliverables include real-time data integration, predictive analytics, and a full-featured web dashboard.
     """)
