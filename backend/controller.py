@@ -283,7 +283,6 @@ async def get_user_sessions(user_id: int):
             GROUP BY sleep_id;
             """, [user_id])
         result = cs.fetchall()
-        print(result)
         if not result:
             raise HTTPException(status_code=400, detail="Invalid request")
         

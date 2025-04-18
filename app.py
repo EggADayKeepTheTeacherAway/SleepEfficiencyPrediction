@@ -64,7 +64,7 @@ elif page == "Dashboard":
             sessions_data = sessions_response.json()
 
             session_options = {
-                session['sleep_id']: f"Session {session['sleep_id']} ({datetime.fromisoformat(session['start_time']).strftime('%Y-%m-%d %H:%M')})"
+                session['sleep_id']: f"Session {session['sleep_id']} ({datetime.fromisoformat(session['start_time']).strftime('%d-%m-%Y %H:%M')})"
                 for session in sessions_data
             }
             selected_session_id = st.selectbox("Select Sleep Session", options=session_options.keys(), format_func=lambda x: session_options[x])
@@ -147,10 +147,10 @@ elif page == "Prediction":
             sessions_response.raise_for_status()
             sessions_data = sessions_response.json()
 
-            session_options = {session['sleep_id']: f"Session {session['sleep_id']} ({datetime.fromisoformat(session['start_time']).strftime('%Y-%m-%d')})" for session in sessions_data}
+            session_options = {session['sleep_id']: f"Session {session['sleep_id']} ({datetime.fromisoformat(session['start_time']).strftime('%d-%m-%Y')})" for session in sessions_data}
             selected_session_id = st.selectbox("Select Session", options=session_options.keys(), format_func=lambda x: session_options[x])
 
-            if selected_session_id:
+            if selected_session_id  or selected_session_id == 0:
                 efficiency_response = requests.get(f"{API_BASE_URL}/efficiency/{user_id}/{selected_session_id}")
                 efficiency_response.raise_for_status()
                 session_efficiency = efficiency_response.json()
@@ -193,7 +193,7 @@ elif page == "Prediction":
                     df_history = pd.DataFrame(all_efficiency_data)
                     if 'start_time' in df_history.columns:
                         # Specify the DMY and time format for 'start_time' as well, if applicable
-                        df_history['start_time'] = pd.to_datetime(df_history['start_time'], format='%Y-%m-%d %H:%M:%S') # Adjust format if needed
+                        df_history['start_time'] = pd.to_datetime(df_history['start_time'], format='%d-%m-%Y %H:%M:%S') # Adjust format if needed
                         fig_history = px.line(df_history, x='start_time', y='efficiency', title='Sleep Efficiency Over Time')
                         st.plotly_chart(fig_history)
                     else:
