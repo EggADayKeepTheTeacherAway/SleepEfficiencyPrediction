@@ -25,8 +25,8 @@ class LogItem(BaseModel):
     user_id: int
     sleep_id: int
     ts: str
-    temperature: float
-    humidity: float
+    temperature: int
+    humidity: int
     heartrate: int
 
 class SessionInfo(BaseModel):
