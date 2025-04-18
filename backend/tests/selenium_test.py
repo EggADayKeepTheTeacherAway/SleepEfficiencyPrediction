@@ -1,35 +1,28 @@
+import unittest
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
-# Create a new instance of the Chrome driver
-driver = webdriver.Chrome('./chromedriver')
+class BasicSeleniumTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        options = Options()
+        cls.driver = webdriver.Chrome(service=Service(), options=options)
+        cls.driver.implicitly_wait(10)
 
-# Open the Python website
-driver.get("https://www.python.org")
+    def test_example_com_title(self):
+        self.driver.get("https://example.com")
+        self.assertIn("Example Domain", self.driver.title)
 
-# Print the page title
-print(driver.title)
+    def test_example_com_heading(self):
+        self.driver.get("https://example.com")
+        heading = self.driver.find_element(By.TAG_NAME, "h1").text
+        self.assertEqual(heading, "Example Domain")
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.quit()
 
-
-# Find the search bar using its name attribute
-
-search_bar = driver.find_element_by_name("q")
-
-search_bar.clear()
-
-search_bar.send_keys("getting started with python")
-
-search_bar.send_keys(Keys.RETURN)
-
-
-
-# Print the current URL
-
-print(driver.current_url)
-
-
-
-# Close the browser window
-
-driver.close()
+if __name__ == "__main__":
+    unittest.main()

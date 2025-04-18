@@ -1,8 +1,6 @@
--r stub/requirements.txt
-DBUtils
-PyMySQL
-cryptography
-numpy
+uvicorn
+fastapi
 scikit-learn
 pandas
 selenium
+cryptography
