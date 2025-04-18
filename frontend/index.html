@@ -102,16 +102,28 @@
         </ul>
       </section>
 
-      <section id="api" class="content-section">
-        <h2>API Overview</h2>
-        <img src="images/api_example.jpg" alt="API Overview Diagram" style="width:100%;max-width:700px;margin-bottom:1rem;" />
-        <ul>
-          <li><strong>/efficiency/{user_id}:</strong> Predicted sleep efficiency and breakdown for latest session</li>
-          <li><strong>/log/{user_id}:</strong> All logged environmental + heartrate data</li>
-          <li><strong>/latest/{user_id}:</strong> Latest reading from sensors</li>
-          <li><strong>/user/login:</strong> Authenticates a user</li>
-          <li><strong>/user/register:</strong> Registers a new user with age, gender, exercise, and smoke info</li>
-          <li><strong>/user/edit:</strong> Updates user profile info</li>
+      <section id="api" class="content-section api-section">
+        <h2>🔌 API Overview</h2>
+        <img src="images/api_example.jpg" alt="API Overview Diagram" class="api-diagram" />
+
+        <ul class="api-list">
+          <li><span class="green">GET /latest/{user_id}</span><br />
+            Retrieves the most recent sleep reading for a given user, including timestamp, temperature, humidity, and heart rate.</li>
+
+          <li><span class="green">GET /efficiency/{user_id}</span><br />
+            Returns a predicted sleep efficiency score for the latest session. Includes breakdown of Light, REM, and Deep sleep percentages, and lifestyle factors (smoke, exercise).</li>
+
+          <li><span class="green">GET /log/{user_id}</span><br />
+            Returns the entire log history of environmental and heart rate data during the user's sleep sessions.</li>
+
+          <li><span class="green">POST /user/login</span><br />
+            Logs in a user using a username and password. Returns success or error.</li>
+
+          <li><span class="green">POST /user/register</span><br />
+            Registers a new user with additional profile data: age, gender, smoke status, and exercise frequency.</li>
+
+          <li><span class="green">POST /user/edit</span><br />
+            Edits an existing user's profile. Accepts all previously registered fields and requires the user_id.</li>
         </ul>
       </section>
 
