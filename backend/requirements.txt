@@ -5,3 +5,4 @@ cryptography
 numpy
 scikit-learn
 pandas
+selenium
