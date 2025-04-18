@@ -193,7 +193,7 @@ elif page == "Prediction":
                     df_history = pd.DataFrame(all_efficiency_data)
                     if 'start_time' in df_history.columns:
                         # Specify the DMY and time format for 'start_time' as well, if applicable
-                        df_history['start_time'] = pd.to_datetime(df_history['start_time'], format='%d-%m-%Y %H:%M:%S') # Adjust format if needed
+                        df_history['start_time'] = pd.to_datetime(df_history['start_time'], format='dayfirst') # Adjust format if needed
                         fig_history = px.line(df_history, x='start_time', y='efficiency', title='Sleep Efficiency Over Time')
                         st.plotly_chart(fig_history)
                     else:
