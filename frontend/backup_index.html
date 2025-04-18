@@ -116,25 +116,25 @@
       </section>
 
       <section id="predict" class="content-section">
-      <h2>🔮 Sleep Efficiency Prediction</h2>
+        <h2>Prediction Page</h2>
 
-      <div id="prediction-section">
-        <div id="prediction-controls">
-          <label for="predict-date">Select a date:</label>
-          <input type="date" id="predict-date" name="predict-date" />
-          <button id="predict-btn">Predict</button>
+        <div style="margin-bottom: 1rem;">
+          <label for="trend-type">Your Sleep Trend: </label>
+          <select id="trend-type">
+            <option value="efficiency">Efficiency</option>
+            <option value="duration">Duration</option>
+          </select>
         </div>
 
-        <div id="prediction-result" style="margin-top: 2rem; display: none;">
-          <h3>Predicted Sleep Efficiency: <span id="predicted-efficiency">--</span>%</h3>
-          <ul>
-            <li>🍬 Smokes: <span id="user-smoke">--</span></li>
-            <li>🏃 Exercise sessions/week: <span id="user-exercise">--</span></li>
-          </ul>
+        <div id="trend-chart" style="height: 400px; margin-bottom: 2rem;"></div>
 
-          <div id="predictionTrendChart" style="width: 100%; height: 400px;"></div>
-        </div>
-      </div>
+        <h3>History</h3>
+        <table id="efficiency-history" border="1" style="width:100%;margin-bottom:2rem;">
+          <thead>
+            <tr><th>Date</th><th>Efficiency</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </section>
 
       <section id="team" class="content-section">
@@ -156,36 +156,25 @@
         </p>
       </section>
 
- <section id="login" class="content-section">
-        <h2>📝 Login / 🆕 Register</h2>
-        <div class="form-grid">
-          <form id="login-form">
-            <h3>Login</h3>
-            <label for="login-username">Username:</label>
-            <input type="text" id="login-username" required />
-            <label for="login-password">Password:</label>
-            <input type="password" id="login-password" required />
-            <button type="submit" class="login-btn">Login</button>
-            <p id="login-message"></p>
-          </form>
+      <section id="login" class="content-section">
+        <h2>📝 Login</h2>
+        <form id="login-form">
+          <label for="login-username">Username:</label><br />
+          <input type="text" id="login-username" required /><br />
+          <label for="login-password">Password:</label><br />
+          <input type="password" id="login-password" required /><br />
+          <label for="login-smoke">Do you Smoke?</label><br />
+          <select id="login-smoke">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select><br />
+          <label for="login-exercise">Exercise sessions/week:</label><br />
+          <input type="number" id="login-exercise" min="0" max="7" /><br />
 
-          <form id="register-form">
-            <h3>Register</h3>
-            <label for="register-username">Username:</label>
-            <input type="text" id="register-username" required />
-            <label for="register-password">Password:</label>
-            <input type="password" id="register-password" required />
-            <label for="register-smoke">Do you Smoke?</label>
-            <select id="register-smoke">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-            <label for="register-exercise">Exercise sessions/week:</label>
-            <input type="number" id="register-exercise" min="0" max="7" required />
-            <button type="submit" class="register-btn">Register</button>
-            <p id="register-message"></p>
-          </form>
-        </div>
+          <button type="submit" class="register-btn">Login</button>
+          <button type="button" class="register-btn">Register</button>
+          <p id="login-message" style="margin-top: 1rem;"></p>
+        </form>
       </section>
 
       <footer>

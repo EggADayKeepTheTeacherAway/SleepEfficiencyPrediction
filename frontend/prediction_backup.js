@@ -1,17 +1,20 @@
-document.addEventListener("DOMContentLoaded", () => {
+// prediction.js
+
+document.addEventListener("DOMContentLoaded", async () => {
   const currentUser = localStorage.getItem("currentUser");
-  const userDB = JSON.parse(localStorage.getItem("userDatabase"));
-  const match = userDB?.find(user => user.username === currentUser);
-  const userId = match?.user_id || 1; // fallback to 1 if not found
+  const userDB = JSON.parse(localStorage.getItem("userDatabase")) || [];
+  const userIndex = userDB.findIndex(u => u.username === currentUser);
+  const userId = userIndex >= 0 ? userIndex + 1 : 1;
 
   const predictBtn = document.getElementById("predict-btn");
+  const predictDate = document.getElementById("predict-date");
   const resultSection = document.getElementById("prediction-result");
   const predictedEfficiency = document.getElementById("predicted-efficiency");
   const userSmoke = document.getElementById("user-smoke");
   const userExercise = document.getElementById("user-exercise");
 
-  predictBtn.addEventListener("click", async () => {
-    const selectedDate = document.getElementById("predict-date").value;
+  predictBtn?.addEventListener("click", async () => {
+    const selectedDate = predictDate?.value;
     if (!selectedDate) return alert("Please select a date.");
 
     try {
@@ -19,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json"
         },
         body: JSON.stringify({
           query: `{
@@ -86,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
         yaxis: { title: "Value" },
         legend: { orientation: "h" }
       });
-
     } catch (error) {
       console.error("Prediction error:", error);
       alert("Prediction failed. Please check your connection or server.");

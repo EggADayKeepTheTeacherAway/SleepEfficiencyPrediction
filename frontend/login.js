@@ -1,34 +1,26 @@
 document.addEventListener("DOMContentLoaded", async () => {
   await seedUsers();
 
-  const sections = document.querySelectorAll(".content-section");
-  sections.forEach((section, index) => {
-    section.classList.toggle("active", index === 0);
-  });
-
   const currentUser = localStorage.getItem("currentUser");
   if (currentUser) {
     document.getElementById("logged-user").textContent = currentUser;
     showLogoutButton();
   }
 
+  // Login
   const loginForm = document.getElementById("login-form");
-  if (loginForm) loginForm.addEventListener("submit", validateLogin);
+  if (loginForm) {
+    loginForm.addEventListener("submit", validateLogin);
+  }
 
-  const registerBtn = document.querySelector(".register-btn[type='button']");
-  if (registerBtn) registerBtn.addEventListener("click", registerUser);
+  // Register
+  const registerForm = document.getElementById("register-form");
+  if (registerForm) {
+    registerForm.addEventListener("submit", registerUser);
+  }
 });
 
-// Toggle section visibility
-export function toggleSection(id) {
-  document.querySelectorAll(".content-section").forEach((section) => {
-    section.classList.remove("active");
-  });
-  document.getElementById(id).classList.add("active");
-}
-
-// Seed users from users.json only if not present in localStorage
-export async function seedUsers() {
+async function seedUsers() {
   if (!localStorage.getItem("userDatabase")) {
     try {
       const res = await fetch("users.json");
@@ -40,8 +32,7 @@ export async function seedUsers() {
   }
 }
 
-// Validate login from localStorage
-export function validateLogin(event) {
+function validateLogin(event) {
   event.preventDefault();
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
@@ -62,14 +53,16 @@ export function validateLogin(event) {
   }
 }
 
-// Register user into localStorage
-export function registerUser() {
-  const username = document.getElementById("login-username").value.trim();
-  const password = document.getElementById("login-password").value.trim();
-  const msg = document.getElementById("login-message");
+function registerUser(event) {
+  event.preventDefault();
+  const username = document.getElementById("register-username").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+  const smoke = document.getElementById("register-smoke").value === "true";
+  const exercise = parseInt(document.getElementById("register-exercise").value, 10);
+  const msg = document.getElementById("register-message");
 
-  if (!username || !password) {
-    msg.textContent = "Username and password required.";
+  if (!username || !password || isNaN(exercise)) {
+    msg.textContent = "All fields are required.";
     msg.style.color = "orange";
     return;
   }
@@ -81,15 +74,14 @@ export function registerUser() {
     msg.textContent = "Username already exists.";
     msg.style.color = "darkorange";
   } else {
-    userDB.push({ username, password });
+    userDB.push({ username, password, smoke, exercise });
     localStorage.setItem("userDatabase", JSON.stringify(userDB));
     msg.textContent = "✅ Registered successfully! Now you can log in.";
     msg.style.color = "green";
   }
 }
 
-// Show logout button
-export function showLogoutButton() {
+function showLogoutButton() {
   const profileBox = document.getElementById("profile-box");
   if (!document.getElementById("logout-btn")) {
     const btn = document.createElement("button");
