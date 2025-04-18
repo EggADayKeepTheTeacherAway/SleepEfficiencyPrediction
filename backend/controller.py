@@ -7,6 +7,7 @@ from typing import List, Optional
 from schemas import *
 from config import OPENAPI_STUB_DIR, DB_HOST, DB_USER, DB_PASSWD, DB_NAME
 from models import SLEEP_STAGE_MODEL, SLEEP_QUALITY_MODEL
+from datetime import datetime, timedelta
 
 sys.path.append(OPENAPI_STUB_DIR)
 
@@ -39,6 +40,47 @@ app.add_middleware(
 # Helper function
 def apply_model(model, data):
     return model.predict(data)
+
+async def get_user_id(username, password):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT user_id
+            FROM sleep_user_data
+            WHERE username = %s AND password = %s
+            """, (username, password))
+        
+        result = cs.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        return result[0]
+    
+async def get_latest_sleep_id(user_id):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT sleep_id, ts
+            FROM sleep
+            WHERE user_id = %s
+            ORDER BY ts DESC
+            LIMIT 1
+            """, (user_id,))
+        result = cs.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid user_id")
+        return result
+        
+
+
+async def check_credential(username, password):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT user_id
+            FROM sleep_user_data
+            WHERE username = %s AND password = %s
+            """, (username, password))
+        
+        result = cs.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
 
 # Routes
 @app.get("/sleep-api/latest/{user_id}", response_model=Latest)
@@ -170,6 +212,59 @@ async def get_user_log(user_id: int):
                 heartrate=row[5]
             ) for row in result
         ]
+    
+@app.get("/sleep-api/log/{user_id}/{sleep_id}", response_model=List[LogItem])
+async def get_user_log(user_id: int, sleep_id: int):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT user_id, sleep_id, ts, temperature, humidity, heartrate
+            FROM sleep 
+            WHERE user_id = %s AND sleep_id = %s
+            """, (user_id, sleep_id))
+        result = cs.fetchall()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid request")
+        
+        return [
+            LogItem(
+                user_id=row[0],
+                sleep_id=row[1],
+                ts=row[2],
+                temperature=row[3],
+                humidity=row[4],
+                heartrate=row[5]
+            ) for row in result
+        ]
+    
+
+@app.post("/sleep-api/log")
+async def send_data(data: IncomingData):
+    try:
+        user_id = await get_user_id(data['username'], data['password'])
+        sleep_id, ts = get_latest_sleep_id(user_id)
+        ts_datetime = datetime.fromisoformat(ts)
+        current_time = datetime.now()
+        time_diff = current_time - ts_datetime
+        if time_diff >= timedelta(hours=1):
+            sleep_id += 1    
+
+        with pool.connection() as conn, conn.cursor() as cs:
+            cs.execute("""
+                INSERT INTO `sleep` (`sleep_id`, `ts`, `temperature`, `humidity`, `heartrate`) 
+                VALUES (%s, %s, %s, %s, %s) 
+            """, (
+                sleep_id,
+                current_time,
+                data.temperature,
+                data.humidity,
+                data.heartrate
+            ))
+            conn.commit()
+
+        return {"message": "Data Inserted"}
+    
+    except HTTPException as e:
+        return e
 
 @app.get("/sleep-api/sessions/{user_id}", response_model=List[SessionInfo])
 async def get_user_sessions(user_id: int):
@@ -257,18 +352,11 @@ async def user_edit(user: UserEdit):
 
 @app.post("/sleep-api/user/login")
 async def user_login(user: UserLogin):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT user_id
-            FROM sleep_user_data
-            WHERE username = %s AND password = %s
-            """, (user.username, user.password))
-        
-        result = cs.fetchone()
-        if not result:
-            raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    return {"message": "Success"}
+    try:
+        await check_credential(user.username, user.password)
+        return {"message": "Success"}
+    except HTTPException as e:
+        return e
 
 if __name__ == "__main__":
     import uvicorn

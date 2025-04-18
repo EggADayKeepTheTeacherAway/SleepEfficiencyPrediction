@@ -56,3 +56,10 @@ class UserDelete(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+class IncomingData(BaseModel):
+    username: str
+    password: str
+    humidity: int
+    temperature: int
+    heartrate: int
