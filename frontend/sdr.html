@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleep Efficiency Overview</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <h2>Sleep Efficiency for Userid 1</h2>
+  <div id="efficiencyChart" style="width: 100%; height: 80vh;"></div>
+
+  <script>
+    async function drawChart() {
+      const response = await fetch("http://localhost:3000/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          query: `
+            {
+              efficiency(userId: 1) {
+                light
+                rem
+                deep
+                efficiency
+              }
+            }
+          `
+        })
+      });
+
+      const result = await response.json();
+      console.log(result); // Debug output
+
+      const efficiencyData = result?.data?.efficiency;
+
+      if (!efficiencyData) {
+        document.getElementById("efficiencyChart").innerText = "Failed to fetch data.";
+        return;
+      }
+
+      const labels = ["Light Sleep", "REM Sleep", "Deep Sleep"];
+      const values = [efficiencyData.light, efficiencyData.rem, efficiencyData.deep];
+
+      const data = [{
+        values: values,
+        labels: labels,
+        type: "pie",
+        textinfo: "label+percent",
+        hole: 0.4
+      }];
+
+      const layout = {
+        title: `Sleep Stage Breakdown - Efficiency Score: ${efficiencyData.efficiency.toFixed(2)}%`
+      };
+
+      Plotly.newPlot("efficiencyChart", data, layout);
+    }
+
+    drawChart();
+  </script>
+</body>
+</html>
