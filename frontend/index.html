@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Sleep Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <button onclick="toggleSection('overview')">📄 Overview</button>
+      <button onclick="toggleSection('dashboard')">📊 Dashboard</button>
+      <button onclick="toggleSection('data')">📚 Data</button>
+      <button onclick="toggleSection('api')">🔌 API</button>
+      <button onclick="toggleSection('predict')">🔮 Prediction</button>
+      <button onclick="toggleSection('team')">👥 Team</button>
+    </nav>
+
+    <main>
+      <header>
+        <h1>Smart Sleep Tracker</h1>
+        <p>Visualize your sleep. Optimize your rest.</p>
+      </header>
+
+      <section id="overview" class="content-section active">
+        <h2><strong>Project Overview</strong></h2>
+      
+        <!-- Banner -->
+        <div class="overview-banner">
+          <img src="images/slee_banner1.jpg" alt="Sleep Analysis Banner" class="overview-img-banner" />
+        </div>
+      
+        <!-- Main Description -->
+        <p>
+          Sleep quality is influenced by multiple factors. Our Smart Sleep Tracker combines real-time data and historical lifestyle patterns to uncover what really affects your sleep by estimating your next sleep cycle based on your current heartrate, room temperature and humidity.
+        </p>
+      
+        <!-- Feature Grid -->
+        <div class="overview-features">
+          <div class="feature-box">
+            <img src="images/thermometer.png" alt="Temp & Humidity" />
+            <h4>Environment Monitoring</h4>
+            <p>Track temperature and humidity using KY-015 sensors in real-time or using the City's Temperature.</p>
+          </div>
+          <div class="feature-box">
+            <img src="images/medical.png" alt="Heart Rate" />
+            <h4>Heart Rate Detection</h4>
+            <p>Monitor heartbeat with KY-039 or any heartbeat Detection tool Example (Apple Watch) and identify sleep disturbances.</p>
+          </div>
+          <div class="feature-box">
+            <img src="images/data.png" alt="Analysis" />
+            <h4>Data Integration</h4>
+            <p>Merge local sensor readings with Kaggle datasets for deeper insights.</p>
+          </div>
+          <div class="feature-box">
+            <img src="images/bot.png" alt="AI Prediction" />
+            <h4>AI-Based Prediction</h4>
+            <p>Estimate upcoming sleep quality based on environmental inputs.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="dashboard" class="content-section">
+        <h2>📊 Sleep Dashboard</h2>
+        <canvas id="sleepDurationChart"></canvas>
+        <canvas id="heartRateChart"></canvas>
+        <canvas id="envConditionsChart"></canvas>
+        <canvas id="qualityByDayChart"></canvas>
+      </section>
+
+      <section id="data" class="content-section">
+        <h2>📚 Data Sources</h2>
+      
+        <h3>Primary</h3>
+        <ul>
+          <li>KY-015: Temperature & Humidity Sensor</li>
+          <li>KY-039: Heartbeat Sensor</li>
+          <li>Google Forms</li>
+        </ul>
+      
+        <h3>Secondary</h3>
+        <ul>
+          <li> 
+            <a href="https://www.kaggle.com/datasets/equilibriumm/sleep-efficiency" target="_blank">
+              1. Kaggle Sleep Efficiency Dataset
+            </a>
+          </li>
+          <li>
+            <img src="images/sleep_efficiency.jpg" class="sleep_data sleep_data1" alt="Sleep Efficiency Chart" />
+          </li>
+      
+          <li>
+            <a href="https://www.kaggle.com/datasets/karthikiye/wearable-tech-sleep-quality/data" target="_blank">
+              2. Kaggle Sleep Environment Dataset
+            </a>
+          </li>
+          <li>
+            <img src="images/sleep_quality.jpg" class="sleep_data sleep_data2" alt="Sleep Quality Chart" />
+          </li>
+      
+          <li>
+            <a href="https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset" target="_blank">
+              3. Sleep Health and Lifestyle Dataset
+            </a>
+          </li>
+          <li>
+            <img src="images/sleep_lifestyle.jpg" class="sleep_data sleep_data3" alt="Sleep Lifestyle Chart" />
+          </li>
+        </ul>
+      </section>
+
+      <section id="api" class="content-section">
+        <h2>API Overview</h2>
+        <ul>
+          <li>Real-time metrics</li>
+          <li>Historical trends</li>
+          <li>Environmental impact analysis</li>
+          <li>Sleep quality prediction</li>
+        </ul>
+      </section>
+
+      <section id="predict" class="content-section">
+        <h2>Prediction Model</h2>
+        <p>Using environmental data and personal vitals, our model estimates your upcoming sleep quality before you close your eyes.</p>
+      </section>
+
+      <section id="team" class="content-section">
+        <h2>👥 Team & Deliverables</h2>
+      
+        <div class="team-grid">
+          <div class="team-member">
+            <img src="images/members/rick.jpg" alt="Riccardo Mario Bonato" class="team-photo" />
+            <h4>Riccardo Mario Bonato</h4>
+            <p>Lead Developer<br />Sensor Integration & AI Modeling</p>
+          </div>
+      
+          <div class="team-member">
+            <img src="images/members/rat.jpg" alt="Rattanan Rung-Uthai" class="team-photo" />
+            <h4>Rattanan Rung-Uthai</h4>
+            <p>Data Engineer<br />Dashboard & API Design</p>
+          </div>
+        </div>
+      
+        <p style="margin-top: 2rem;">
+          This project was developed by a Year-2 student team from course 01219335 (Data Acquisition and Integration). Final deliverables include real-time data integration, predictive analytics, and a full-featured web dashboard.
+        </p>
+      </section>
+      <footer>
+        <p>&copy; 2025 Smart Sleep Tracker Project</p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
