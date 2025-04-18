@@ -7,6 +7,7 @@ from typing import List, Optional
 from schemas import *
 from config import OPENAPI_STUB_DIR, DB_HOST, DB_USER, DB_PASSWD, DB_NAME
 from models import SLEEP_STAGE_MODEL, SLEEP_QUALITY_MODEL
+from datetime import datetime, timedelta
 
 sys.path.append(OPENAPI_STUB_DIR)
 
@@ -40,6 +41,48 @@ app.add_middleware(
 def apply_model(model, data):
     return model.predict(data)
 
+async def get_user_id(username, password):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT user_id
+            FROM sleep_user_data
+            WHERE username = %s AND password = %s
+            """, (username, password))
+        
+        result = cs.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        return result[0]
+    
+async def get_latest_sleep_id(user_id):
+    """Returns (sleep_id, ts)"""
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT sleep_id, ts
+            FROM sleep
+            WHERE user_id = %s
+            ORDER BY ts DESC
+            LIMIT 1
+            """, (user_id,))
+        result = cs.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid user_id")
+        return result
+        
+
+
+async def check_credential(username, password):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT user_id
+            FROM sleep_user_data
+            WHERE username = %s AND password = %s
+            """, (username, password))
+        
+        result = cs.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+
 # Routes
 @app.get("/sleep-api/latest/{user_id}", response_model=Latest)
 async def get_latest(user_id: int):
@@ -63,69 +106,54 @@ async def get_latest(user_id: int):
             heartrate=result[5]
         )
 
-@app.get("/sleep-api/efficiency/{user_id}", response_model=Efficiency)
+@app.get("/sleep-api/efficiency/{user_id}", response_model=List[Efficiency])
 async def get_user_efficiency(user_id: int):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT temperature, humidity, heartrate
-            FROM sleep
-            WHERE user_id = %s AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = %s ORDER BY ts DESC LIMIT 1)
-        """, (user_id, user_id))
-        result = cs.fetchall()
-        if not result:
-            raise HTTPException(status_code=400, detail="Invalid request")
-        
-        result = apply_model(SLEEP_STAGE_MODEL, result).tolist()
-        light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
-
-        cs.execute("""
-            SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds
-            FROM sleep
-            WHERE user_id = %s AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = %s ORDER BY ts DESC LIMIT 1)
-        """, (user_id, user_id))
-        sleep_duration = cs.fetchone()[0]/3600
-
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute("""
             SELECT age, gender, smoke, exercise
             FROM sleep_user_data
             WHERE user_id = %s
         """, (user_id,))
-        age, gender, smoke, exercise = cs.fetchone()
-        sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
-    
-    return Efficiency(
-        light=light,
-        rem=rem,
-        deep=deep,
-        smoke=bool(smoke),
-        exercise=exercise,
-        efficiency=sleep_efficiency
-    )
-
-@app.get("/sleep-api/efficiency/{user_id}/{sleep_id}", response_model=Efficiency)
-async def get_user_efficiency_sleep_id(user_id: int, sleep_id: int):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT temperature, humidity, heartrate
-            FROM sleep
-            WHERE user_id = %s AND sleep_id = %s
-        """, (user_id, sleep_id))
-        result = cs.fetchall()
+        result = cs.fetchone()
+        age, gender, smoke, exercise = result
         if not result:
             raise HTTPException(status_code=400, detail="Invalid request")
         
-        # Assuming the SLEEP_STAGE_MODEL returns stages
-        result_stages = apply_model(SLEEP_STAGE_MODEL, result).tolist()
-        light, rem, deep = (result_stages.count(stage)/len(result_stages) for stage in ['Light', 'REM', 'Deep'])
+    return_list = []    
+    for sleep_id in range(await get_latest_sleep_id()[0]):
+        with pool.connection() as conn, conn.cursor() as cs:
+            cs.execute("""
+                SELECT temperature, humidity, heartrate
+                FROM sleep
+                WHERE user_id = %s AND sleep_id = %s
+            """, (user_id, sleep_id))
+            result = apply_model(SLEEP_STAGE_MODEL, cs.fetchall()).tolist()
+            light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
+            sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
 
-        cs.execute("""
-            SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds
-            FROM sleep
-            WHERE user_id = %s AND sleep_id = %s
-        """, (user_id, sleep_id))
-        sleep_duration = cs.fetchone()[0]/3600
+            cs.execute("""
+                SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds, MIN(ts), MAX(ts)
+                FROM sleep
+                WHERE user_id = %s AND sleep_id = (SELECT sleep_id FROM sleep WHERE user_id = %s ORDER BY ts DESC LIMIT 1)
+            """, (user_id, user_id))
+            sleep_duration, start_time, end_time = cs.fetchone()
+            sleep_duration = sleep_duration/3600
+            return_list.append(
+                Efficiency(
+                    light=light,
+                    rem=rem,
+                    deep=deep,
+                    smoke=bool(smoke),
+                    exercise=exercise,
+                    efficiency=sleep_efficiency,
+                    sleep_duration=sleep_duration,
+                    start_time=start_time,
+                    end_time=end_time
+            ))
+    return return_list
 
+@app.get("/sleep-api/efficiency/{user_id}/{sleep_id}", response_model=Efficiency)
+async def get_user_efficiency_sleep_id(user_id: int, sleep_id: int):
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute("""
             SELECT age, gender, smoke, exercise
@@ -135,18 +163,38 @@ async def get_user_efficiency_sleep_id(user_id: int, sleep_id: int):
         result = cs.fetchone()
         if not result:
             raise HTTPException(status_code=400, detail="Invalid request")
-        
         age, gender, smoke, exercise = result
+
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT temperature, humidity, heartrate
+            FROM sleep
+            WHERE user_id = %s AND sleep_id = %s
+        """, (user_id, sleep_id))
+        result = apply_model(SLEEP_STAGE_MODEL, cs.fetchall()).tolist()
+        light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
+        sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
+
+        cs.execute("""
+            SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds, MIN(ts), MAX(ts)
+            FROM sleep
+            WHERE user_id = %s AND sleep_id = %s
+        """, (user_id, sleep_id))
+        sleep_duration, start_time, end_time = cs.fetchone()
+        sleep_duration = sleep_duration/3600
         sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
     
-    return Efficiency(
-        light=light,
-        rem=rem,
-        deep=deep,
-        smoke=bool(smoke),
-        exercise=exercise,
-        efficiency=sleep_efficiency
-    )
+        return Efficiency(
+                light=light,
+                rem=rem,
+                deep=deep,
+                smoke=bool(smoke),
+                exercise=exercise,
+                efficiency=sleep_efficiency,
+                sleep_duration=sleep_duration,
+                start_time=start_time,
+                end_time=end_time
+                )
 
 @app.get("/sleep-api/log/{user_id}", response_model=List[LogItem])
 async def get_user_log(user_id: int):
@@ -170,6 +218,59 @@ async def get_user_log(user_id: int):
                 heartrate=row[5]
             ) for row in result
         ]
+    
+@app.get("/sleep-api/log/{user_id}/{sleep_id}", response_model=List[LogItem])
+async def get_user_log(user_id: int, sleep_id: int):
+    with pool.connection() as conn, conn.cursor() as cs:
+        cs.execute("""
+            SELECT user_id, sleep_id, ts, temperature, humidity, heartrate
+            FROM sleep 
+            WHERE user_id = %s AND sleep_id = %s
+            """, (user_id, sleep_id))
+        result = cs.fetchall()
+        if not result:
+            raise HTTPException(status_code=400, detail="Invalid request")
+        
+        return [
+            LogItem(
+                user_id=row[0],
+                sleep_id=row[1],
+                ts=row[2],
+                temperature=row[3],
+                humidity=row[4],
+                heartrate=row[5]
+            ) for row in result
+        ]
+    
+
+@app.post("/sleep-api/log")
+async def send_data(data: IncomingData):
+    try:
+        user_id = await get_user_id(data['username'], data['password'])
+        sleep_id, ts = get_latest_sleep_id(user_id)
+        ts_datetime = datetime.fromisoformat(ts)
+        current_time = datetime.now()
+        time_diff = current_time - ts_datetime
+        if time_diff >= timedelta(hours=1):
+            sleep_id += 1    
+
+        with pool.connection() as conn, conn.cursor() as cs:
+            cs.execute("""
+                INSERT INTO `sleep` (`sleep_id`, `ts`, `temperature`, `humidity`, `heartrate`) 
+                VALUES (%s, %s, %s, %s, %s) 
+            """, (
+                sleep_id,
+                current_time,
+                data.temperature,
+                data.humidity,
+                data.heartrate
+            ))
+            conn.commit()
+
+        return {"message": "Data Inserted"}
+    
+    except HTTPException as e:
+        return e
 
 @app.get("/sleep-api/sessions/{user_id}", response_model=List[SessionInfo])
 async def get_user_sessions(user_id: int):
@@ -255,20 +356,32 @@ async def user_edit(user: UserEdit):
     
     return {"message": "Success"}
 
+
+@app.post("/sleep-api/user/delete")
+async def user_edit(user: UserDelete):
+    try:
+        db_id = await get_user_id(user['username'], user['password'])
+        with pool.connection() as conn, conn.cursor() as cs:
+            if db_id != user['user_id']:
+                raise HTTPException(400, 'Invalid Credentials')
+            cs.execute("""
+                DELETE FROM sleep_user_data WHERE `sleep_user_data`.`user_id` = %s
+            """, (
+                user.user_id,
+            ))
+            conn.commit()
+        return {"message": "User deleted"}
+    except HTTPException as e:
+        return e
+
+
 @app.post("/sleep-api/user/login")
 async def user_login(user: UserLogin):
-    with pool.connection() as conn, conn.cursor() as cs:
-        cs.execute("""
-            SELECT user_id
-            FROM sleep_user_data
-            WHERE username = %s AND password = %s
-            """, (user.username, user.password))
-        
-        result = cs.fetchone()
-        if not result:
-            raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    return {"message": "Success"}
+    try:
+        await check_credential(user.username, user.password)
+        return {"message": "Success"}
+    except HTTPException as e:
+        return e
 
 if __name__ == "__main__":
     import uvicorn
