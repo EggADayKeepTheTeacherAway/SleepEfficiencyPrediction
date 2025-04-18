@@ -51,6 +51,11 @@ class UserEdit(BaseModel):
     smoke: bool
     exercise: int
 
+class UserDelete(BaseModel):
+    user_id: int
+    username: str
+    password: str
+
 class UserLogin(BaseModel):
     username: str
     password: str
