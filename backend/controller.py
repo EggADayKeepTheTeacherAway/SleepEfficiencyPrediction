@@ -378,8 +378,9 @@ async def user_edit(user: UserDelete):
 @app.post("/sleep-api/user/login")
 async def user_login(user: UserLogin):
     try:
-        await check_credential(user.username, user.password)
-        return {"message": "Success"}
+        user_id = await get_user_id(user.username, user.password)
+        return {"message": "Success", "user_id": user_id }
+
     except HTTPException as e:
         return e
 
