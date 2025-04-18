@@ -17,6 +17,9 @@ class Efficiency(BaseModel):
     smoke: bool
     exercise: int
     efficiency: float
+    sleep_duration: float
+    start_time: str
+    end_time: str
 
 class LogItem(BaseModel):
     user_id: int
