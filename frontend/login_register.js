@@ -34,29 +34,45 @@ async function seedUsers() {
 }
 
 // Login logic
-function validateLogin(event) {
+async function validateLogin(event) {
   event.preventDefault();
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
   const msg = document.getElementById("login-message");
 
-  const userDB = JSON.parse(localStorage.getItem("userDatabase")) || [];
-  const match = userDB.find(user => user.username === username && user.password === password);
-
-  if (match) {
-    localStorage.setItem("currentUser", username);
-    document.getElementById("logged-user").textContent = username;
-    msg.textContent = `Welcome, ${username}!`;
-    msg.style.color = "green";
-    showLogoutButton();
-  } else {
-    msg.textContent = "Invalid username or password.";
+  try {
+    const response = await fetch("http://127.0.0.1:8080/sleep-api/user/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.message === "Success") {
+      localStorage.setItem("currentUser", username);
+      document.getElementById("logged-user").textContent = username;
+      msg.textContent = `Welcome, ${username}!`;
+      msg.style.color = "green";
+      showLogoutButton();
+    } else {
+      msg.textContent = "Invalid username or password.";
+      msg.style.color = "red";
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    msg.textContent = "Login failed. Please check your connection.";
     msg.style.color = "red";
   }
 }
 
 // Register logic
-function registerUser(event) {
+async function registerUser(event) {
   event.preventDefault();
   const username = document.getElementById("register-username").value.trim();
   const password = document.getElementById("register-password").value.trim();
@@ -70,17 +86,35 @@ function registerUser(event) {
     return;
   }
 
-  const userDB = JSON.parse(localStorage.getItem("userDatabase")) || [];
-  const exists = userDB.some(user => user.username === username);
-
-  if (exists) {
-    msg.textContent = "Username already exists.";
-    msg.style.color = "darkorange";
-  } else {
-    userDB.push({ username, password, smoke, exercise });
-    localStorage.setItem("userDatabase", JSON.stringify(userDB));
-    msg.textContent = "✅ Registered successfully! Now you can log in.";
-    msg.style.color = "green";
+  try {
+    const response = await fetch("http://127.0.0.1:8080/sleep-api/user/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+        age: 25, // Default value since not in form
+        gender: "male", // Default value since not in form
+        smoke,
+        exercise
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.message === "User Registered") {
+      msg.textContent = "✅ Registered successfully! Now you can log in.";
+      msg.style.color = "green";
+    } else {
+      msg.textContent = data.detail || "Registration failed.";
+      msg.style.color = "darkorange";
+    }
+  } catch (error) {
+    console.error("Registration error:", error);
+    msg.textContent = "Registration failed. Please check your connection.";
+    msg.style.color = "red";
   }
 }
 

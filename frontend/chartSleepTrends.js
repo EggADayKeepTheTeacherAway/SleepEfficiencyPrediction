@@ -1,31 +1,11 @@
-async function fetchSleepLog(userId = 1) {
-  const res = await fetch('http://localhost:3000/graphql', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      query: `
-        {
-          log(userId: ${userId}) {
-            ts
-            temperature
-            humidity
-            heartrate
-          }
-        }
-      `
-    })
-  });
-
-  const result = await res.json();
-  return result.data.log;
-}
+import { fetchUserLog } from './api.js';
 
 async function drawTimeSeriesChart() {
-  const logs = await fetchSleepLog();
-  if (!logs || logs.length === 0) return;
+  const logs = await fetchUserLog(1); // Default to user 1
+  if (!logs || logs.length === 0) {
+    document.getElementById("timeSeriesChart").innerText = "No sleep data available.";
+    return;
+  }
 
   const timestamps = logs.map(log => new Date(log.ts).toLocaleTimeString());
   const temps = logs.map(log => log.temperature);

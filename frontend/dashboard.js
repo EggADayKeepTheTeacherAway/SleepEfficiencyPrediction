@@ -1,34 +1,9 @@
 // dashboard.js
 
-async function fetchEfficiency(userId = 1) {
-  const response = await fetch('http://localhost:3000/graphql', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      query: `
-        {
-          efficiency(userId: ${userId}) {
-            light
-            rem
-            deep
-            smoke
-            exercise
-            efficiency
-          }
-        }
-      `
-    })
-  });
-
-  const result = await response.json();
-  return result?.data?.efficiency;
-}
+import { fetchEfficiency, fetchUserLog } from './api.js';
 
 export async function renderSleepStageChart() {
-  const data = await fetchEfficiency();
+  const data = await fetchEfficiency(1); // Default to user 1
 
   if (!data) {
     document.getElementById("sleepStageChart").innerText = "Failed to fetch efficiency data.";
@@ -45,7 +20,7 @@ export async function renderSleepStageChart() {
   }];
 
   const layout = {
-    title: `Sleep Stage Breakdown - Efficiency Score: ${data.efficiency.toFixed(2)}%`,
+    title: `Sleep Stage Breakdown - Efficiency Score: ${(data.efficiency * 100).toFixed(2)}%`,
     height: 400,
     width: 500,
   };
@@ -59,30 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function drawEnvironmentalTrends() {
-  const resp = await fetch("http://localhost:3000/graphql", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({
-      query: `
-        {
-          log(userId: 1) {
-            ts
-            temperature
-            humidity
-            heartrate
-          }
-        }
-      `
-    })
-  });
-
-  const result = await resp.json();
-  const logs = result?.data?.log;
-
-  if (!logs) {
+  const logs = await fetchUserLog(1); // Default to user 1
+  
+  if (!logs || logs.length === 0) {
     document.getElementById("timeSeriesChart").innerText = "Failed to load logs.";
     return;
   }

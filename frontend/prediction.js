@@ -1,3 +1,5 @@
+import { fetchEfficiency, fetchUserLog } from './api.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   const currentUser = localStorage.getItem("currentUser");
   const userDB = JSON.parse(localStorage.getItem("userDatabase"));
@@ -10,42 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const userSmoke = document.getElementById("user-smoke");
   const userExercise = document.getElementById("user-exercise");
 
-  predictBtn.addEventListener("click", async () => {
+  predictBtn?.addEventListener("click", async () => {
     const selectedDate = document.getElementById("predict-date").value;
     if (!selectedDate) return alert("Please select a date.");
 
     try {
-      const response = await fetch("http://localhost:3000/graphql", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          query: `{
-            efficiency(userId: ${userId}) {
-              light
-              rem
-              deep
-              efficiency
-              smoke
-              exercise
-            }
-            log(userId: ${userId}) {
-              ts
-              temperature
-              humidity
-              heartrate
-            }
-          }`
-        })
-      });
+      // Fetch efficiency data directly from FastAPI
+      const efficiency = await fetchEfficiency(userId);
+      const logs = await fetchUserLog(userId);
 
-      const json = await response.json();
-      const efficiency = json?.data?.efficiency;
-      const logs = json?.data?.log;
-
-      if (!efficiency || !logs) {
+      if (!efficiency || !logs || logs.length === 0) {
         alert("Prediction failed. Try again later.");
         return;
       }

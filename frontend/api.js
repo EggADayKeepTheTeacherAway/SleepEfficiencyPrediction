@@ -10,41 +10,36 @@ export async function getUserLog(user_id = 0) {
 }
 
 export async function fetchEfficiency(userId) {
-  const response = await fetch("http://localhost:3000/graphql", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: `{
-        efficiency(userId: ${userId}) {
-          light
-          rem
-          deep
-          efficiency
-          smoke
-          exercise
-        }
-      }`
-    })
-  });
-  const json = await response.json();
-  return json?.data?.efficiency;
+  try {
+    const response = await fetch(`http://127.0.0.1:8080/sleep-api/efficiency/${userId}`);
+    if (!response.ok) throw new Error("API fetch failed");
+    const data = await response.json();
+    // Return the first efficiency record if it's an array
+    return Array.isArray(data) ? data[0] : data;
+  } catch (err) {
+    console.error("Error fetching efficiency:", err);
+    return null;
+  }
 }
 
 export async function fetchUserLog(userId) {
-  const response = await fetch("http://localhost:3000/graphql", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: `{
-        log(userId: ${userId}) {
-          ts
-          temperature
-          humidity
-          heartrate
-        }
-      }`
-    })
-  });
-  const json = await response.json();
-  return json?.data?.log;
+  try {
+    const response = await fetch(`http://127.0.0.1:8080/sleep-api/log/${userId}`);
+    if (!response.ok) throw new Error("API fetch failed");
+    return await response.json();
+  } catch (err) {
+    console.error("Error fetching user log:", err);
+    return [];
+  }
+}
+
+export async function fetchLatestData(userId) {
+  try {
+    const response = await fetch(`http://127.0.0.1:8080/sleep-api/latest/${userId}`);
+    if (!response.ok) throw new Error("API fetch failed");
+    return await response.json();
+  } catch (err) {
+    console.error("Error fetching latest data:", err);
+    return null;
+  }
 }
