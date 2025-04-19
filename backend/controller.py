@@ -70,6 +70,10 @@ async def get_latest_sleep_id(user_id):
         return result
         
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 async def check_credential(username, password):
     with pool.connection() as conn, conn.cursor() as cs:
         cs.execute("""
@@ -119,8 +123,12 @@ async def get_user_efficiency(user_id: int):
             raise HTTPException(status_code=400, detail="Invalid request")
         
     return_list = []    
+<<<<<<< HEAD
     max_sleep_id = await get_latest_sleep_id(user_id)
     for sleep_id in range(max_sleep_id[0]):
+=======
+    for sleep_id in range(await get_latest_sleep_id()[0]):
+>>>>>>> main
         with pool.connection() as conn, conn.cursor() as cs:
             cs.execute("""
                 SELECT temperature, humidity, heartrate
@@ -129,6 +137,10 @@ async def get_user_efficiency(user_id: int):
             """, (user_id, sleep_id))
             result = apply_model(SLEEP_STAGE_MODEL, cs.fetchall()).tolist()
             light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
+<<<<<<< HEAD
+=======
+            sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
+>>>>>>> main
 
             cs.execute("""
                 SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds, MIN(ts), MAX(ts)
@@ -137,9 +149,12 @@ async def get_user_efficiency(user_id: int):
             """, (user_id, user_id))
             sleep_duration, start_time, end_time = cs.fetchone()
             sleep_duration = sleep_duration/3600
+<<<<<<< HEAD
 
             sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
 
+=======
+>>>>>>> main
             return_list.append(
                 Efficiency(
                     light=light,
@@ -149,8 +164,13 @@ async def get_user_efficiency(user_id: int):
                     exercise=exercise,
                     efficiency=sleep_efficiency,
                     sleep_duration=sleep_duration,
+<<<<<<< HEAD
                     start_time=start_time.strftime("%d-%m-%Y %H:%M:%S"),
                     end_time=end_time.strftime("%d-%m-%Y %H:%M:%S")
+=======
+                    start_time=start_time,
+                    end_time=end_time
+>>>>>>> main
             ))
     return return_list
 
@@ -175,6 +195,10 @@ async def get_user_efficiency_sleep_id(user_id: int, sleep_id: int):
         """, (user_id, sleep_id))
         result = apply_model(SLEEP_STAGE_MODEL, cs.fetchall()).tolist()
         light, rem, deep = (result.count(stage)/len(result) for stage in ['Light', 'REM', 'Deep'])
+<<<<<<< HEAD
+=======
+        sleep_efficiency = apply_model(SLEEP_QUALITY_MODEL, [[age, sleep_duration, rem, deep, light, exercise, gender == 'male', smoke]])[0]
+>>>>>>> main
 
         cs.execute("""
             SELECT TIMESTAMPDIFF(SECOND, MIN(ts), MAX(ts)) AS sleep_duration_seconds, MIN(ts), MAX(ts)
@@ -193,8 +217,13 @@ async def get_user_efficiency_sleep_id(user_id: int, sleep_id: int):
                 exercise=exercise,
                 efficiency=sleep_efficiency,
                 sleep_duration=sleep_duration,
+<<<<<<< HEAD
                 start_time=start_time.strftime("%d-%m-%Y %H:%M:%S"),
                 end_time=end_time.strftime("%d-%m-%Y %H:%M:%S")
+=======
+                start_time=start_time,
+                end_time=end_time
+>>>>>>> main
                 )
 
 @app.get("/sleep-api/log/{user_id}", response_model=List[LogItem])
@@ -213,7 +242,11 @@ async def get_user_log(user_id: int):
             LogItem(
                 user_id=row[0],
                 sleep_id=row[1],
+<<<<<<< HEAD
                 ts=row[2].strftime("%d-%m-%Y %H:%M:%S"),
+=======
+                ts=row[2],
+>>>>>>> main
                 temperature=row[3],
                 humidity=row[4],
                 heartrate=row[5]
@@ -236,7 +269,11 @@ async def get_user_log(user_id: int, sleep_id: int):
             LogItem(
                 user_id=row[0],
                 sleep_id=row[1],
+<<<<<<< HEAD
                 ts=row[2].strftime("%d-%m-%Y %H:%M:%S"),
+=======
+                ts=row[2],
+>>>>>>> main
                 temperature=row[3],
                 humidity=row[4],
                 heartrate=row[5]
@@ -283,6 +320,10 @@ async def get_user_sessions(user_id: int):
             GROUP BY sleep_id;
             """, [user_id])
         result = cs.fetchall()
+<<<<<<< HEAD
+=======
+        print(result)
+>>>>>>> main
         if not result:
             raise HTTPException(status_code=400, detail="Invalid request")
         
