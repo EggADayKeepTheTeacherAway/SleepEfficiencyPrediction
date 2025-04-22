@@ -1,6 +1,6 @@
 <h1>Project Overview</h1>
 
-<p> Sleep efficiency is influenced by various environmental factors such as temperature, humidity, air pollution, noise levels, and light exposure. By integrating real-time sensor data with historical sleep records, we can uncover patterns that reveal how these external conditions impact sleep duration, efficiency, and disturbances.</p>
+<p> Sleep efficiency is influenced by various environmental factors such as temperature, and humidity. By integrating real-time sensor data with historical sleep records, we can uncover patterns that reveal how these external conditions impact sleep duration, and efficiency</p>
 <h2>Primary Data Source</h2>
 <p> Temperature & Humidity sensor (KY-015), Heartbeat sensor (KY-039)</p>
 <h2>Secondary Data Source</h2>
@@ -13,7 +13,7 @@
   Historical Sleep Trends</li>
   <li>Access sleep duration, efficiency, and disturbances over time.
   Environmental Impact on Sleep</li>
-  <li>Correlate sleep efficiency with temperature, humidity, air pollution, and noise levels.</li>
+  <li>Correlate sleep efficiency with temperature, humidity, heart-rate, and other personal factor(Smoking habit, Exercise).</li>
   <li>Predict sleep efficiency</li>
 </ul>
 
