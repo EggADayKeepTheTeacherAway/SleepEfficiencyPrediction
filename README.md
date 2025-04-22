@@ -1,5 +1,5 @@
 <h1>Project Overview</h1>
-<p> Sleep quality is influenced by various environmental factors such as temperature, humidity, air pollution, noise levels, and light exposure. By integrating real-time sensor data with historical sleep records, we can uncover patterns that reveal how these external conditions impact sleep duration, efficiency, and disturbances.</p>
+<p> Sleep efficiency is influenced by various environmental factors such as temperature, humidity, air pollution, noise levels, and light exposure. By integrating real-time sensor data with historical sleep records, we can uncover patterns that reveal how these external conditions impact sleep duration, efficiency, and disturbances.</p>
 
 <h2>Primary Data Source</h2>
 <p> Temperature & Humidity sensor (KY-015), Heartbeat sensor (KY-039)</p>
@@ -9,12 +9,12 @@
 </p>
 <h2>API to be Provided to Users</h2>
 <ul>
-  <li>Real-time Sleep Data: Retrieve the latest sleep duration and quality metrics.
+  <li>Real-time Sleep Data: Retrieve the latest sleep duration and efficiency metrics.
   Historical Sleep Trends</li>
   <li>Access sleep duration, efficiency, and disturbances over time.
   Environmental Impact on Sleep</li>
-  <li>Correlate sleep quality with temperature, humidity, air pollution, and noise levels.</li>
-  <li>Predict sleep quality</li>
+  <li>Correlate sleep efficiency with temperature, humidity, air pollution, and noise levels.</li>
+  <li>Predict sleep efficiency</li>
 </ul>
 
 </ul>
@@ -32,7 +32,7 @@ Temperature and humidity sensor	KY-015 x2
 <h2>Prediction</h2>
 <ul>
 <li>
-Sleep prediction quality: the quality of the next sleep cycle based on the current environment 
+Sleep prediction efficiency: the efficiency of the next sleep cycle based on the current environment 
 </li>
 </ul>
 
@@ -51,7 +51,7 @@ cd SleepQualityPrediction
 ```
 
 ## Backend
-### Change directory to backend
+### Change directory to `backend`
 ```cmd
 cd backend
 ```
@@ -81,6 +81,21 @@ cd backend
 uvicorn controller:app --port 8080 --reload
 ```
 
-# Frontend
+## Frontend
+### Make sure you are at root directory
+ You should be at `SleepEfficiencyPrediction` directory
+ - If you are at `backend` directory, go back a level.
+ ```cmd
+ cd ..
+ ```
+### Change directory to `frontend`
+```cmd
+cd frontend
+```
+
+### Run streamlit
+```cmd
+stream run app.py
+```
 
 
