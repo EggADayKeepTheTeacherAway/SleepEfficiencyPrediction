@@ -39,6 +39,8 @@ Sleep prediction efficiency: the efficiency of the next sleep cycle based on the
 <br>
 
 # Installation
+## Install `python` v3.13
+[Download python here](https://www.python.org/downloads/)
 ## Download
 1. Open terminal
 2. Clone this repository
