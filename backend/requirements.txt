@@ -1,4 +1,10 @@
+pymysql
+dbutils
 uvicorn
 fastapi
 scikit-learn
+joblib
 cryptography
+numpy
+pandas
+selenium

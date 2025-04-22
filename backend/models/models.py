@@ -1,8 +1,5 @@
-import pickle
+import joblib
 
+SLEEP_QUALITY_MODEL = joblib.load("./backend/models/sleep_quality_model.pkl")
 
-with open('models/sleep_quality_model.pkl', 'rb') as file:  
-    SLEEP_QUALITY_MODEL = pickle.load(file)
-
-with open('models/sleep_stage_model.pkl', 'rb') as file:  
-    SLEEP_STAGE_MODEL = pickle.load(file)
+SLEEP_STAGE_MODEL = joblib.load("./backend/models/sleep_stage_model.pkl")
