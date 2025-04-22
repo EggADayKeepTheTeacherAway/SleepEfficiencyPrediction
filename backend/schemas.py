@@ -6,8 +6,8 @@ class Latest(BaseModel):
     user_id: int
     sleep_id: int
     ts: str
-    temperature: float
-    humidity: float
+    temperature: int
+    humidity: int
     heartrate: int
 
 class Efficiency(BaseModel):
@@ -51,14 +51,11 @@ class UserEdit(BaseModel):
     smoke: bool
     exercise: int
 
-<<<<<<< HEAD
 class UserDelete(BaseModel):
     user_id: int
     username: str
     password: str
 
-=======
->>>>>>> main
 class UserLogin(BaseModel):
     username: str
     password: str

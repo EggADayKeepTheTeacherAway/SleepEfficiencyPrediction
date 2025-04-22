@@ -7,3 +7,4 @@ joblib
 cryptography
 numpy
 pandas
+selenium

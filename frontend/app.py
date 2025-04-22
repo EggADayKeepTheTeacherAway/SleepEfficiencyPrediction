@@ -12,6 +12,7 @@ page = st.sidebar.radio("Go to", ["Overview", "Dashboard", "Data Sources", "API 
 
 # User Authentication (Simplified in Streamlit)
 logged_in_user = st.session_state.get('logged_in_user')
+logged_in_username = st.session_state.get('logged_in_username')
 
 def login():
     username = st.sidebar.text_input("Username")
@@ -20,7 +21,8 @@ def login():
         try:
             response = requests.post(f"{API_BASE_URL}/user/login", json={"username": username, "password": password})
             response.raise_for_status()
-            st.session_state['logged_in_user'] = username
+            st.session_state['logged_in_user'] = response.json().get('user_id')
+            st.session_state['logged_in_username'] = username
             st.success(f"Logged in as {username}")
             st.rerun() # Refresh to update UI
         except requests.exceptions.RequestException as e:
@@ -36,7 +38,7 @@ def logout():
 if not logged_in_user and page != "Register":
     login()
 elif logged_in_user:
-    st.sidebar.write(f"Logged in as: {logged_in_user}")
+    st.sidebar.write(f"Logged in as: {logged_in_username}")
     logout()
 
 # --- Page Content ---
@@ -57,8 +59,22 @@ if page == "Overview":
 elif page == "Dashboard":
     st.header("Sleep Dashboard")
     if logged_in_user:
-        user_id = 1  # Replace with actual user ID retrieval
+        user_id = st.session_state['logged_in_user']
         try:
+            # Efficiency History
+            all_efficiency_response = requests.get(f"{API_BASE_URL}/efficiency/{user_id}")
+            all_efficiency_response.raise_for_status()
+            all_efficiency_data = all_efficiency_response.json()
+
+            if all_efficiency_data:
+                df_history = pd.DataFrame(all_efficiency_data)
+                df_history['start_time'] = pd.to_datetime(df_history['start_time'], dayfirst=True)
+                df_history['efficiency'] = (df_history['efficiency'] * 100).round(4)
+                fig_history = px.line(df_history, x='start_time', y='efficiency', title='Sleep Efficiency Over Time')
+                st.plotly_chart(fig_history)
+            else:
+                st.warning("No sleep efficiency history available.")
+
             sessions_response = requests.get(f"{API_BASE_URL}/sessions/{user_id}")
             sessions_response.raise_for_status()
             sessions_data = sessions_response.json()
@@ -69,7 +85,7 @@ elif page == "Dashboard":
             }
             selected_session_id = st.selectbox("Select Sleep Session", options=session_options.keys(), format_func=lambda x: session_options[x])
 
-            if selected_session_id:
+            if selected_session_id or selected_session_id == 0:
                 efficiency_response = requests.get(f"{API_BASE_URL}/efficiency/{user_id}/{selected_session_id}")
                 efficiency_response.raise_for_status()
                 efficiency_data = efficiency_response.json()
@@ -100,6 +116,8 @@ elif page == "Dashboard":
                 else:
                     st.warning("No sleep log data available for this session.")
 
+                
+
         except requests.exceptions.RequestException as e:
             st.error(f"Error fetching data: {e}")
         except requests.exceptions.HTTPError as e:
@@ -118,13 +136,9 @@ elif page == "Data Sources":
     st.subheader("Secondary")
     st.markdown("""
         - [Kaggle Sleep Efficiency Dataset](https://www.kaggle.com/datasets/equilibriumm/sleep-efficiency)
-        - ![](/images/sleep_efficiency.jpg)
         - [Kaggle Sleep Environment Dataset](https://www.kaggle.com/datasets/karthikiye/wearable-tech-sleep-quality/data)
-        - ![](/images/sleep_quality.jpg)
         - [Sleep Health and Lifestyle Dataset](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset)
-        - ![](/images/sleep_lifestyle.jpg)
     """)
-    st.info("Ensure the images are in a static `images` folder at the root of your Streamlit app or accessible via a URL.")
 
 elif page == "API Info":
     st.header("API Overview")
@@ -141,7 +155,7 @@ elif page == "API Info":
 elif page == "Prediction":
     st.header("Sleep Prediction")
     if logged_in_user:
-        user_id = 1 # Replace with actual user ID retrieval
+        user_id = st.session_state['logged_in_user']
         try:
             sessions_response = requests.get(f"{API_BASE_URL}/sessions/{user_id}")
             sessions_response.raise_for_status()
@@ -183,23 +197,6 @@ elif page == "Prediction":
                     st.plotly_chart(fig_heartrate)
                 else:
                     st.warning("No environmental data for this session.")
-
-                # Efficiency History
-                all_efficiency_response = requests.get(f"{API_BASE_URL}/efficiency/{user_id}")
-                all_efficiency_response.raise_for_status()
-                all_efficiency_data = all_efficiency_response.json()
-
-                if all_efficiency_data:
-                    df_history = pd.DataFrame(all_efficiency_data)
-                    if 'start_time' in df_history.columns:
-                        # Specify the DMY and time format for 'start_time' as well, if applicable
-                        df_history['start_time'] = pd.to_datetime(df_history['start_time'], format='dayfirst') # Adjust format if needed
-                        fig_history = px.line(df_history, x='start_time', y='efficiency', title='Sleep Efficiency Over Time')
-                        st.plotly_chart(fig_history)
-                    else:
-                        st.warning("No 'start_time' column found in efficiency history data.")
-                else:
-                    st.warning("No sleep efficiency history available.")
 
         except requests.exceptions.RequestException as e:
             st.error(f"Error fetching data: {e}")
