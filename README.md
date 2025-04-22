@@ -99,3 +99,7 @@ stream run app.py
 ```
 
 
+## Member
+- Rattanan Runguthai 6610545481
+- Riccardo Mario Bonato 6610545502
+![](diagrams/veryimportantimage/egg.jpg)
